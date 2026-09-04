@@ -1,1 +1,1 @@
-"""HTTP API application."""
+"""FastAPI application package."""
