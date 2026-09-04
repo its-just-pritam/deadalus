@@ -23,13 +23,15 @@ Tool selection:
 - Flight questions use flight lookup, route, date, count, or longest-block tools.
 - Pairing questions use pairing and crew-assignment tools.
 - Legality, qualification, rest, station-closure, and FDP questions use operational query tools.
+- Cancellation impact, at-risk duty, reserve availability, and downstream-rest questions use their matching operational tools.
 - Rule questions use the rule retrieval tool.
 
 Reserve-window interpretation:
 - An on-call window describes when the reserve may be called.
 - Reachability describes whether a callout can support the required report time.
-- Evaluate callout time and report time as separate facts.
-- When no callout time is supplied, report that callout-window eligibility is unresolved and answer only what the available data supports.
+- Map event time to context, report time to window matching, and reachability to timing feasibility.
+- When report time is missing, retrieve it from the pairing or flight schedule before evaluating reserve availability.
+- Pass the required duty report time to `get_available_reserves.report_time`.
 
 Use retrieved facts and backend calculations in the final answer. State any missing input explicitly.
 """

@@ -216,6 +216,41 @@ class RestCheckInput(BaseModel):
     crew_id: str | None = None
 
 
+class CancellationImpactInput(BaseModel):
+    flight_id: str
+    date: str = Field(
+        description="Operating date in YYYY-MM-DD format, for example 2026-09-16"
+    )
+
+
+class AtRiskInput(BaseModel):
+    date: str
+    minimum_duty_hours: float
+
+
+class ReserveAvailabilityInput(BaseModel):
+    date: str = Field(description="Duty date in YYYY-MM-DD format")
+    base: str = Field(description="Crew base, for example BLR")
+    rank: str = Field(description="Required crew rank, for example Captain")
+    report_time: str = Field(
+        description=(
+            "Required duty report time in UTC HH:MM format. Use this value for "
+            "reserve on-call window matching. Treat any sickness notification or "
+            "event time as separate operational context."
+        )
+    )
+    aircraft_type: str | None = Field(
+        default=None,
+        description="Required aircraft type, for example ATR72",
+    )
+
+
+class DownstreamRestInput(BaseModel):
+    crew_id: str
+    pairing_id: str
+    date: str
+
+
 def _list_reserves(base: str, date: str | None = None) -> str:
     return _get_json("list_reserves", "/api/reserves", {"base": base, "date": date})
 
@@ -419,6 +454,50 @@ def _check_rest(release_utc: str, crew_id: str | None = None) -> str:
         "check_rest",
         "/api/rest-check",
         {"releaseUtc": release_utc, "crewId": crew_id},
+    )
+
+
+def _get_cancellation_impact(flight_id: str, date: str) -> str:
+    return _get_json(
+        "get_cancellation_impact",
+        f"/api/flights/{flight_id}/cancellation-impact",
+        {"date": date},
+    )
+
+
+def _get_at_risk_crew(date: str, minimum_duty_hours: float) -> str:
+    return _get_json(
+        "get_at_risk_crew",
+        "/api/duty-clocks/at-risk",
+        {"date": date, "minimumDutyHours": str(minimum_duty_hours)},
+    )
+
+
+def _get_available_reserves(
+    date: str,
+    base: str,
+    rank: str,
+    report_time: str,
+    aircraft_type: str | None = None,
+) -> str:
+    return _get_json(
+        "get_available_reserves",
+        "/api/reserves/available",
+        {
+            "date": date,
+            "base": base,
+            "rank": rank,
+            "reportTime": report_time,
+            "aircraftType": aircraft_type,
+        },
+    )
+
+
+def _check_downstream_rest(crew_id: str, pairing_id: str, date: str) -> str:
+    return _get_json(
+        "check_downstream_rest",
+        f"/api/crew/{crew_id}/downstream-rest-check",
+        {"pairingId": pairing_id, "date": date},
     )
 
 
@@ -644,5 +723,34 @@ def get_retrieval_tools() -> list[StructuredTool]:
                 "not required when the release time is provided."
             ),
             args_schema=RestCheckInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_cancellation_impact,
+            name="get_cancellation_impact",
+            description="Retrieve passengers and cancellation cost for a flight.",
+            args_schema=CancellationImpactInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_at_risk_crew,
+            name="get_at_risk_crew",
+            description="Find crew at or above a duty-hour threshold including planned duty.",
+            args_schema=AtRiskInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_available_reserves,
+            name="get_available_reserves",
+            description=(
+                "Find reserves whose on-call window covers the required duty report "
+                "time and whose rating matches the aircraft. Map event time to "
+                "context, report time to window matching, and reachability to the "
+                "timing feasibility check."
+            ),
+            args_schema=ReserveAvailabilityInput,
+        ),
+        StructuredTool.from_function(
+            func=_check_downstream_rest,
+            name="check_downstream_rest",
+            description="Check whether a proposed pairing leaves sufficient rest before later duties.",
+            args_schema=DownstreamRestInput,
         ),
     ]

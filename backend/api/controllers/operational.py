@@ -1,4 +1,4 @@
-"""Operational query endpoints for Q17-Q20."""
+"""Operational legality, disruption, and rest query endpoints."""
 
 from datetime import datetime, timedelta
 import sqlite3
@@ -133,7 +133,9 @@ class OperationalController:
         if clock is None:
             raise HTTPException(status_code=404, detail="Duty clock not found")
         rule = RulesetRepository(connection).get_rule("RULE-DUTY-02")
-        limit = float(rule.parameters.max_duty_hours) if rule else 60.0
+        if rule is None or rule.parameters.max_duty_hours is None:
+            raise HTTPException(status_code=500, detail="RULE-DUTY-02 is not configured")
+        limit = float(rule.parameters.max_duty_hours)
         start = datetime.fromisoformat(date).date()
         issues = []
         cumulative_new = 0.0
@@ -208,9 +210,16 @@ class OperationalController:
         release = datetime.fromisoformat(day.release_utc.replace("Z", "+00:00"))
         fdp = (release - report).total_seconds() / 3600 + delay_hours
         rule = RulesetRepository(connection).get_rule("RULE-FDP-01")
-        base = float(rule.parameters.base_fdp_hours) if rule else 13.0
-        reduction = float(rule.parameters.reduction_per_extra_sector_hours) if rule else 0.5
-        free = int(rule.parameters.free_sectors) if rule else 2
+        if (
+            rule is None
+            or rule.parameters.base_fdp_hours is None
+            or rule.parameters.reduction_per_extra_sector_hours is None
+            or rule.parameters.free_sectors is None
+        ):
+            raise HTTPException(status_code=500, detail="RULE-FDP-01 is not configured")
+        base = float(rule.parameters.base_fdp_hours)
+        reduction = float(rule.parameters.reduction_per_extra_sector_hours)
+        free = int(rule.parameters.free_sectors)
         limit = base - max(0, sectors - free) * reduction
         return FdpCheckResponse(
             aircraft=pairing.aircraft,
@@ -263,13 +272,35 @@ class OperationalController:
         result = cls.crew_legality(crew_id, date, pairing_id, connection)
         pairing = cls._pairing(pairing_id, connection)
         issues = list(result.issues)
-        day = next((item for item in pairing.days if item.date == date), None)
         consequence = None
-        if crew_id == "C-2210" and pairing_id == "P-2291":
-            consequence = (
-                "Deadhead positioning on DX402 (arrives 08:45Z) delays the first "
-                "departure by approximately 3 hours; RULE-BASE-07 deadhead cost applies."
+        crew = CrewRepository(connection).get(crew_id)
+        day = next((item for item in pairing.days if item.date == date), None)
+        if crew is None:
+            raise HTTPException(status_code=404, detail="Crew not found")
+        if day is None:
+            raise HTTPException(status_code=404, detail="Pairing date not found")
+        first_flight = FlightRepository(connection).get(day.flight_ids[0])
+        if first_flight is None:
+            raise HTTPException(status_code=500, detail="Pairing flight not found")
+        if crew.base != first_flight.dep_station:
+            positioning = FlightRepository(connection).list(
+                date=date,
+                departure_station=crew.base,
+                arrival_station=first_flight.dep_station,
             )
+            if positioning:
+                arrival = datetime.fromisoformat(
+                    positioning[0].arr_utc.replace("Z", "+00:00")
+                )
+                report = datetime.fromisoformat(
+                    day.report_utc.replace("Z", "+00:00")
+                )
+                delay_hours = max(0.0, (arrival + timedelta(minutes=15) - report).total_seconds() / 3600)
+                consequence = (
+                    f"Deadhead positioning on {positioning[0].flight_no} (arrives "
+                    f"{positioning[0].arr_utc[11:16]}Z) delays the first departure by "
+                    f"approximately {delay_hours:.1f} hours; RULE-BASE-07 deadhead cost applies."
+                )
         return PairingLegalityResponse(
             crew_id=crew_id,
             pairing_id=pairing_id,
@@ -293,11 +324,15 @@ class OperationalController:
         if day is None:
             raise HTTPException(status_code=404, detail="Pairing date not found")
         release = datetime.fromisoformat(day.release_utc.replace("Z", "+00:00"))
-        earliest = release + timedelta(hours=12)
+        rule = RulesetRepository(connection).get_rule("RULE-REST-04")
+        if rule is None or rule.parameters.min_rest_hours is None:
+            raise HTTPException(status_code=500, detail="RULE-REST-04 is not configured")
+        minimum_rest = float(rule.parameters.min_rest_hours)
+        earliest = release + timedelta(hours=minimum_rest)
         return RestCheckResponse(
             crew_id=crew_id,
             release_utc=day.release_utc,
-            minimum_rest_hours=12.0,
+            minimum_rest_hours=minimum_rest,
             earliest_next_report_utc=earliest.isoformat().replace("+00:00", "Z"),
             legal=True,
         )
