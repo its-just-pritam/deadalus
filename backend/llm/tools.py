@@ -196,6 +196,26 @@ class FdpCheckInput(BaseModel):
     delay_hours: float = 0.0
 
 
+class QualificationInput(BaseModel):
+    crew_id: str
+    aircraft_type: str
+    date: str
+
+
+class PairingLegalityInput(BaseModel):
+    pairing_id: str
+    crew_id: str
+    date: str
+    delay_hours: float = 0.0
+
+
+class RestCheckInput(BaseModel):
+    release_utc: str = Field(
+        description="UTC release timestamp in ISO-8601 format, for example 2026-09-16T15:30:00Z"
+    )
+    crew_id: str | None = None
+
+
 def _list_reserves(base: str, date: str | None = None) -> str:
     return _get_json("list_reserves", "/api/reserves", {"base": base, "date": date})
 
@@ -376,6 +396,32 @@ def _check_fdp(pairing_id: str, crew_id: str, date: str, delay_hours: float = 0.
     )
 
 
+def _check_qualification(crew_id: str, aircraft_type: str, date: str) -> str:
+    return _get_json(
+        "check_qualification",
+        f"/api/crew/{crew_id}/qualification",
+        {"aircraftType": aircraft_type, "date": date},
+    )
+
+
+def _check_pairing_legality(
+    pairing_id: str, crew_id: str, date: str, delay_hours: float = 0.0
+) -> str:
+    return _get_json(
+        "check_pairing_legality",
+        f"/api/pairings/{pairing_id}/legality",
+        {"crewId": crew_id, "date": date, "delayHours": str(delay_hours)},
+    )
+
+
+def _check_rest(release_utc: str, crew_id: str | None = None) -> str:
+    return _get_json(
+        "check_rest",
+        "/api/rest-check",
+        {"releaseUtc": release_utc, "crewId": crew_id},
+    )
+
+
 def get_retrieval_tools() -> list[StructuredTool]:
     """Return the only tools the operational LLM may use for retrieval."""
     return [
@@ -383,8 +429,9 @@ def get_retrieval_tools() -> list[StructuredTool]:
             func=_list_reserves,
             name="list_reserves",
             description=(
-                "Retrieve reserve crew and their on-call windows from the operational API. "
-                "Use this before answering reserve availability questions."
+                "Retrieve reserve crew, on-call windows, and availability dates from the "
+                "operational API. The window applies to callout time, not report time; "
+                "use reachability to relate callout and report."
             ),
             args_schema=ReserveSearchInput,
         ),
@@ -417,7 +464,8 @@ def get_retrieval_tools() -> list[StructuredTool]:
             name="get_reserve",
             description=(
                 "Retrieve an authoritative reserve profile including base, dates, "
-                "on-call window, rank, ratings, and reachability."
+                "on-call window, rank, ratings, and reachability. The on-call window "
+                "constrains callout time, not report time."
             ),
             args_schema=CrewInput,
         ),
@@ -574,5 +622,27 @@ def get_retrieval_tools() -> list[StructuredTool]:
             name="check_fdp",
             description="Check FDP after delay against RULE-FDP-01 for a pairing duty.",
             args_schema=FdpCheckInput,
+        ),
+        StructuredTool.from_function(
+            func=_check_qualification,
+            name="check_qualification",
+            description="Check aircraft rating and certification validity for crew on a date.",
+            args_schema=QualificationInput,
+        ),
+        StructuredTool.from_function(
+            func=_check_pairing_legality,
+            name="check_pairing_legality",
+            description="Check a crew member's legality for a pairing and date.",
+            args_schema=PairingLegalityInput,
+        ),
+        StructuredTool.from_function(
+            func=_check_rest,
+            name="check_rest",
+            description=(
+                "Calculate the earliest next report from a provided release timestamp "
+                "using the authoritative RULE-REST-04 minimum rest. A pairing ID is "
+                "not required when the release time is provided."
+            ),
+            args_schema=RestCheckInput,
         ),
     ]

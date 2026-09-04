@@ -161,3 +161,29 @@ class FdpCheckResponse(BaseModel):
     fdp_after_delay: float
     fdp_limit: float
     breach: bool
+
+
+class QualificationResponse(BaseModel):
+    crew_id: str
+    aircraft_type: str
+    date: str
+    qualified: bool
+    ratings: list[str]
+    certification_issues: list[str]
+
+
+class PairingLegalityResponse(BaseModel):
+    crew_id: str
+    pairing_id: str
+    date: str
+    legal: bool
+    issues: list[str]
+    consequence: str | None = None
+
+
+class RestCheckResponse(BaseModel):
+    crew_id: str | None
+    release_utc: str
+    minimum_rest_hours: float
+    earliest_next_report_utc: str
+    legal: bool
