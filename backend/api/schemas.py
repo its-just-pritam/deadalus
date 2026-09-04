@@ -187,3 +187,26 @@ class RestCheckResponse(BaseModel):
     minimum_rest_hours: float
     earliest_next_report_utc: str
     legal: bool
+
+
+class CancellationImpactResponse(BaseModel):
+    flight_id: str
+    passengers: int
+    cancellation_cost_inr: int
+
+
+class AtRiskCrewResponse(BaseModel):
+    crew_id: str
+    duty_hours_7d_including_plan: float
+
+
+class ReserveEligibilityResponse(BaseModel):
+    eligible: list[str]
+    excluded: dict[str, str]
+
+
+class DownstreamRestResponse(BaseModel):
+    crew_id: str
+    pairing_id: str
+    legal: bool
+    issues: list[str]

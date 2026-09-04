@@ -9,6 +9,7 @@ from backend.api.controllers.duty_clocks import DutyClockController
 from backend.api.controllers.flights import FlightController
 from backend.api.controllers.pairings import PairingController
 from backend.api.controllers.risk_signals import RiskSignalController
+from backend.api.controllers.operational_impact import OperationalImpactController
 from backend.api.controllers.reserves import ReserveController
 from backend.api.controllers.rules import RuleController
 from backend.api.controllers.stations import StationController
@@ -29,6 +30,7 @@ app.include_router(FlightController().router)
 app.include_router(PairingController().router)
 app.include_router(PairingController().aircraft_router)
 app.include_router(RiskSignalController().router)
+app.include_router(OperationalImpactController().router)
 app.include_router(ReserveController().router)
 app.include_router(RuleController().router)
 app.include_router(StationController().router)
