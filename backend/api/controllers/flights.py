@@ -5,7 +5,7 @@ import sqlite3
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from backend.api.dependencies import get_connection
-from backend.api.schemas import FlightResponse
+from backend.api.schemas import FlightCountResponse, FlightResponse, LongestBlockResponse
 from backend.infrastructure.repositories import FlightRepository
 
 
@@ -39,6 +39,24 @@ class FlightController:
             self.list_departures,
             methods=["GET"],
             response_model=list[FlightResponse],
+        )
+        self.router.add_api_route(
+            "/routes",
+            self.list_routes,
+            methods=["GET"],
+            response_model=list[FlightResponse],
+        )
+        self.router.add_api_route(
+            "/count",
+            self.count_flights,
+            methods=["GET"],
+            response_model=FlightCountResponse,
+        )
+        self.router.add_api_route(
+            "/longest-block",
+            self.longest_block,
+            methods=["GET"],
+            response_model=LongestBlockResponse,
         )
         self.router.add_api_route(
             "/{flight_id}",
@@ -88,3 +106,34 @@ class FlightController:
             departure_station=station,
         )
         return [_flight_response(flight) for flight in flights]
+
+    @staticmethod
+    def list_routes(
+        date: str = Query(min_length=1),
+        departure_station: str = Query(min_length=1, alias="departureStation"),
+        arrival_station: str = Query(min_length=1, alias="arrivalStation"),
+        connection: sqlite3.Connection = Depends(get_connection),
+    ) -> list[FlightResponse]:
+        flights = FlightRepository(connection).list(
+            date=date,
+            departure_station=departure_station,
+            arrival_station=arrival_station,
+        )
+        return [_flight_response(flight) for flight in flights]
+
+    @staticmethod
+    def count_flights(
+        date: str = Query(min_length=1),
+        connection: sqlite3.Connection = Depends(get_connection),
+    ) -> FlightCountResponse:
+        return FlightCountResponse(
+            date=date,
+            flight_count=FlightRepository(connection).count(date=date),
+        )
+
+    @staticmethod
+    def longest_block(
+        connection: sqlite3.Connection = Depends(get_connection),
+    ) -> LongestBlockResponse:
+        block_hours, flights = FlightRepository(connection).longest_block()
+        return LongestBlockResponse(block_hours=block_hours, flights=flights)

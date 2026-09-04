@@ -1,5 +1,7 @@
 """Read repositories over the generated crew_operations SQLite schema."""
 
+from __future__ import annotations
+
 import json
 import sqlite3
 from typing import Any
@@ -52,12 +54,34 @@ class CrewRepository:
             ratings=tuple(item["value"] for item in ratings),
         )
 
-    def list(self, *, status: str | None = None) -> list[Crew]:
+    def list(
+        self,
+        *,
+        status: str | None = None,
+        base: str | None = None,
+        rank: str | None = None,
+        aircraft_type: str | None = None,
+    ) -> list[Crew]:
         query = "SELECT crew_id FROM crew"
-        args: tuple[Any, ...] = ()
+        conditions: list[str] = []
+        args: list[str] = []
         if status is not None:
-            query += " WHERE status = ?"
-            args = (status,)
+            conditions.append("status = ?")
+            args.append(status)
+        if base is not None:
+            conditions.append("base = ?")
+            args.append(base)
+        if rank is not None:
+            conditions.append("rank = ?")
+            args.append(rank)
+        if aircraft_type is not None:
+            conditions.append(
+                "EXISTS (SELECT 1 FROM crew_ratings r "
+                "WHERE r.parent_id = crew.id AND r.value = ?)"
+            )
+            args.append(aircraft_type)
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
         query += " ORDER BY crew_id"
         return [crew for row in self.connection.execute(query, args)
                 if (crew := self.get(row["crew_id"])) is not None]
@@ -112,6 +136,27 @@ class FlightRepository:
         query += " ORDER BY dep_utc, flight_id"
         return [flight for row in self.connection.execute(query, args)
                 if (flight := self.get(row["flight_id"])) is not None]
+
+    def count(self, *, date: str) -> int:
+        row = self.connection.execute(
+            "SELECT COUNT(*) AS count FROM flights WHERE date = ?", (date,)
+        ).fetchone()
+        return int(row["count"])
+
+    def longest_block(self) -> tuple[float, list[str]]:
+        row = self.connection.execute(
+            "SELECT MAX(block_hours) AS block_hours FROM flights"
+        ).fetchone()
+        block_hours = float(row["block_hours"])
+        flights = [
+            item["flight_no"]
+            for item in self.connection.execute(
+                "SELECT flight_no FROM flights WHERE block_hours = ? "
+                    "GROUP BY flight_no ORDER BY flight_no",
+                (block_hours,),
+            )
+        ]
+        return block_hours, flights
 
 
 class PairingRepository:

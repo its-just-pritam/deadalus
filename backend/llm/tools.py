@@ -145,6 +145,23 @@ class PairingInput(BaseModel):
     pairing_id: str = Field(description="Pairing identifier, for example P-2291")
 
 
+class CrewSearchInput(BaseModel):
+    base: str | None = None
+    rank: str | None = None
+    status: str | None = None
+    aircraft_type: str | None = None
+
+
+class FlightRouteInput(BaseModel):
+    date: str
+    departure_station: str
+    arrival_station: str
+
+
+class FlightDateInput(BaseModel):
+    date: str
+
+
 def _list_reserves(base: str, date: str | None = None) -> str:
     return _get_json("list_reserves", "/api/reserves", {"base": base, "date": date})
 
@@ -234,6 +251,44 @@ def _get_pairing(pairing_id: str) -> str:
 
 def _get_pairing_crew(pairing_id: str) -> str:
     return _get_json("get_pairing_crew", f"/api/pairings/{pairing_id}/crew")
+
+
+def _search_crew(
+    base: str | None = None,
+    rank: str | None = None,
+    status: str | None = None,
+    aircraft_type: str | None = None,
+) -> str:
+    return _get_json(
+        "search_crew",
+        "/api/crew/search",
+        {
+            "base": base,
+            "rank": rank,
+            "status": status,
+            "aircraftType": aircraft_type,
+        },
+    )
+
+
+def _list_route_flights(date: str, departure_station: str, arrival_station: str) -> str:
+    return _get_json(
+        "list_route_flights",
+        "/api/flights/routes",
+        {
+            "date": date,
+            "departureStation": departure_station,
+            "arrivalStation": arrival_station,
+        },
+    )
+
+
+def _count_flights(date: str) -> str:
+    return _get_json("count_flights", "/api/flights/count", {"date": date})
+
+
+def _get_longest_block() -> str:
+    return _get_json("get_longest_block", "/api/flights/longest-block")
 
 
 def get_retrieval_tools() -> list[StructuredTool]:
@@ -363,5 +418,34 @@ def get_retrieval_tools() -> list[StructuredTool]:
             name="get_pairing_crew",
             description="Retrieve the authoritative crew and roles assigned to a pairing.",
             args_schema=PairingInput,
+        ),
+        StructuredTool.from_function(
+            func=_search_crew,
+            name="search_crew",
+            description=(
+                "Search authoritative crew profiles by optional base, rank, status, "
+                "and aircraft rating filters."
+            ),
+            args_schema=CrewSearchInput,
+        ),
+        StructuredTool.from_function(
+            func=_list_route_flights,
+            name="list_route_flights",
+            description=(
+                "Retrieve authoritative flights on a date between a departure and "
+                "arrival station."
+            ),
+            args_schema=FlightRouteInput,
+        ),
+        StructuredTool.from_function(
+            func=_count_flights,
+            name="count_flights",
+            description="Count authoritative flights operating on a UTC date.",
+            args_schema=FlightDateInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_longest_block,
+            name="get_longest_block",
+            description="Retrieve the longest block time and all flight numbers with it.",
         ),
     ]

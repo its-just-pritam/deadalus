@@ -80,6 +80,16 @@ class FlightResponse(BaseModel):
     seats: int
 
 
+class FlightCountResponse(BaseModel):
+    date: str
+    flight_count: int
+
+
+class LongestBlockResponse(BaseModel):
+    block_hours: float
+    flights: list[str]
+
+
 class CertificationResponse(BaseModel):
     crew_id: str
     cert_type: str
