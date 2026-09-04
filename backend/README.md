@@ -272,7 +272,7 @@ and are not available yet.
 
 - <span style="color: goldenrod">[planned]</span> `GET /api/crew`
 - <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}`
-- <span style="color: goldenrod">[planned]</span> `GET /api/crew/{crewId}/ratings`
+- <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/ratings`
 - <span style="color: goldenrod">[planned]</span> `GET /api/crew/{crewId}/certifications`
 - <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/duty-clock`
 - <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/duty-history`

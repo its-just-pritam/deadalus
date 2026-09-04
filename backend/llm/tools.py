@@ -149,6 +149,10 @@ def _get_crew(crew_id: str) -> str:
     return _get_json("get_crew_profile", f"/api/crew/{crew_id}")
 
 
+def _get_crew_ratings(crew_id: str) -> str:
+    return _get_json("get_crew_ratings", f"/api/crew/{crew_id}/ratings")
+
+
 def _get_on_call_window(crew_id: str) -> str:
     return _get_json(
         "get_reserve_on_call_window",
@@ -239,6 +243,12 @@ def get_retrieval_tools() -> list[StructuredTool]:
                 "Retrieve a crew member's authoritative profile, rank, base, status, "
                 "ratings, seniority, and reachability from the operational API."
             ),
+            args_schema=CrewInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_crew_ratings,
+            name="get_crew_ratings",
+            description="Retrieve a crew member's authoritative aircraft ratings.",
             args_schema=CrewInput,
         ),
         StructuredTool.from_function(
