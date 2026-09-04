@@ -123,6 +123,15 @@ class FlightDepartureInput(BaseModel):
     station: str = Field(description="Departure station code, for example DEL")
 
 
+class CertificationRangeInput(BaseModel):
+    from_date: str = Field(
+        description="Inclusive start date in YYYY-MM-DD format, for example 2026-09-15"
+    )
+    to_date: str = Field(
+        description="Inclusive end date in YYYY-MM-DD format, for example 2026-10-15"
+    )
+
+
 def _list_reserves(base: str, date: str | None = None) -> str:
     return _get_json("list_reserves", "/api/reserves", {"base": base, "date": date})
 
@@ -179,6 +188,14 @@ def _list_departures(date: str, station: str) -> str:
         "list_departures",
         "/api/flights/departures",
         {"date": date, "station": station},
+    )
+
+
+def _list_expiring_certifications(from_date: str, to_date: str) -> str:
+    return _get_json(
+        "list_expiring_certifications",
+        "/api/certifications/expiring",
+        {"from": from_date, "to": to_date},
     )
 
 
@@ -261,5 +278,14 @@ def get_retrieval_tools() -> list[StructuredTool]:
                 "Retrieve all authoritative flights departing a station on a UTC date."
             ),
             args_schema=FlightDepartureInput,
+        ),
+        StructuredTool.from_function(
+            func=_list_expiring_certifications,
+            name="list_expiring_certifications",
+            description=(
+                "Retrieve authoritative crew certifications whose valid_to date "
+                "falls within an inclusive UTC date range."
+            ),
+            args_schema=CertificationRangeInput,
         ),
     ]

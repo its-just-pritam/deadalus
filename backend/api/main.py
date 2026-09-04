@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 
 from backend.api.controllers.chat import ChatController
+from backend.api.controllers.certifications import CertificationController
 from backend.api.controllers.crew import CrewController
 from backend.api.controllers.duty_clocks import DutyClockController
 from backend.api.controllers.flights import FlightController
@@ -17,6 +18,7 @@ app = FastAPI(
 )
 
 app.include_router(CrewController().router)
+app.include_router(CertificationController().router)
 app.include_router(DutyClockController().router)
 app.include_router(FlightController().router)
 app.include_router(ReserveController().router)

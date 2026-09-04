@@ -316,7 +316,7 @@ and are not available yet.
 
 - <span style="color: green">[implemented]</span> `GET /api/duty-clocks/{crewId}/headroom?asOf=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/duty-clocks/at-risk?date=&minimumDutyHours=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/certifications/expiring?from=&to=`
+- <span style="color: green">[implemented]</span> `GET /api/certifications/expiring?from=&to=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/assignments/{pairingId}/crew-impact?crewId=&date=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/flights/{flightId}/passenger-impact`
 - <span style="color: goldenrod">[planned]</span> `GET /api/flights/affected?station=&from=&to=`

@@ -70,3 +70,10 @@ class FlightResponse(BaseModel):
     aircraft: str
     aircraft_type: str
     seats: int
+
+
+class CertificationResponse(BaseModel):
+    crew_id: str
+    cert_type: str
+    valid_from: str
+    valid_to: str

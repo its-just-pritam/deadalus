@@ -203,6 +203,14 @@ class CertificationRepository:
             "WHERE crew_id = ? ORDER BY valid_to, cert_type", (crew_id,))
         return [Certification(*row) for row in rows]
 
+    def list_expiring(self, *, from_date: str, to_date: str) -> list[Certification]:
+        rows = self.connection.execute(
+            "SELECT crew_id, cert_type, valid_from, valid_to FROM certifications "
+            "WHERE valid_to BETWEEN ? AND ? ORDER BY id",
+            (from_date, to_date),
+        )
+        return [Certification(*row) for row in rows]
+
 
 class DutyClockRepository:
     def __init__(self, connection: sqlite3.Connection):
