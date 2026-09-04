@@ -95,6 +95,18 @@ class CrewInput(BaseModel):
     crew_id: str = Field(description="Crew identifier, for example C-1042")
 
 
+class DutyHeadroomInput(BaseModel):
+    crew_id: str = Field(description="Crew identifier, for example C-1042")
+    as_of: str | None = Field(
+        default=None,
+        description="UTC snapshot timestamp in ISO format, for example 2026-09-14T18:00:00Z",
+    )
+
+
+class RuleInput(BaseModel):
+    rule_id: str = Field(description="Rule identifier, for example RULE-DUTY-02")
+
+
 def _list_reserves(base: str, date: str | None = None) -> str:
     return _get_json("list_reserves", "/api/reserves", {"base": base, "date": date})
 
@@ -108,6 +120,26 @@ def _get_on_call_window(crew_id: str) -> str:
         "get_reserve_on_call_window",
         f"/api/reserves/{crew_id}/on-call-window",
     )
+
+
+def _get_duty_clock(crew_id: str) -> str:
+    return _get_json("get_duty_clock", f"/api/crew/{crew_id}/duty-clock")
+
+
+def _get_duty_history(crew_id: str) -> str:
+    return _get_json("get_duty_history", f"/api/crew/{crew_id}/duty-history")
+
+
+def _get_duty_headroom(crew_id: str, as_of: str | None = None) -> str:
+    return _get_json(
+        "get_duty_headroom",
+        f"/api/duty-clocks/{crew_id}/headroom",
+        {"asOf": as_of},
+    )
+
+
+def _get_rule(rule_id: str) -> str:
+    return _get_json("get_rule", f"/api/rules/{rule_id}")
 
 
 def get_retrieval_tools() -> list[StructuredTool]:
@@ -139,5 +171,38 @@ def get_retrieval_tools() -> list[StructuredTool]:
                 "from the operational API."
             ),
             args_schema=CrewInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_duty_clock,
+            name="get_duty_clock",
+            description=(
+                "Retrieve the authoritative 7-day duty hours, 28-day flight hours, "
+                "last rest, and snapshot metadata for a crew member."
+            ),
+            args_schema=CrewInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_duty_history,
+            name="get_duty_history",
+            description=(
+                "Retrieve the authoritative daily duty and flight-hour history for a "
+                "crew member. Use it when a question asks for a calendar-day window."
+            ),
+            args_schema=CrewInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_duty_headroom,
+            name="get_duty_headroom",
+            description=(
+                "Retrieve authoritative 7-day duty-hour headroom under RULE-DUTY-02 "
+                "for a crew member."
+            ),
+            args_schema=DutyHeadroomInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_rule,
+            name="get_rule",
+            description="Retrieve the authoritative text and parameters for an operational rule.",
+            args_schema=RuleInput,
         ),
     ]

@@ -4,7 +4,9 @@ from fastapi import FastAPI
 
 from backend.api.controllers.chat import ChatController
 from backend.api.controllers.crew import CrewController
+from backend.api.controllers.duty_clocks import DutyClockController
 from backend.api.controllers.reserves import ReserveController
+from backend.api.controllers.rules import RuleController
 
 
 app = FastAPI(
@@ -14,5 +16,7 @@ app = FastAPI(
 )
 
 app.include_router(CrewController().router)
+app.include_router(DutyClockController().router)
 app.include_router(ReserveController().router)
+app.include_router(RuleController().router)
 app.include_router(ChatController().router)

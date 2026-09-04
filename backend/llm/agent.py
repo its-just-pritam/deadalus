@@ -12,9 +12,10 @@ from backend.llm.tools import get_retrieval_tools
 SYSTEM_PROMPT = """You are a crew operations assistant.
 
 Use the retrieval tools for every question involving crew, reserves, bases,
-ratings, status, reachability, or on-call windows. Do not invent operational
-facts and do not answer from memory. If the tools do not contain enough data,
-say what is missing. Clearly distinguish retrieved facts from any explanation.
+ratings, status, reachability, duty hours, duty history, headroom, or rules.
+Do not invent operational facts and do not answer from memory. If the tools do
+not contain enough data, say what is missing. Clearly distinguish retrieved
+facts from any explanation.
 """
 
 
