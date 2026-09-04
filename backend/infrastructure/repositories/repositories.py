@@ -78,12 +78,27 @@ class FlightRepository:
             "dep_utc", "arr_utc", "block_hours", "aircraft", "aircraft_type",
             "seats")})
 
-    def list(self, *, date: str | None = None) -> list[Flight]:
+    def list(
+        self,
+        *,
+        date: str | None = None,
+        departure_station: str | None = None,
+        arrival_station: str | None = None,
+    ) -> list[Flight]:
         query = "SELECT flight_id FROM flights"
-        args: tuple[Any, ...] = ()
+        conditions: list[str] = []
+        args: list[str] = []
         if date is not None:
-            query += " WHERE date = ?"
-            args = (date,)
+            conditions.append("date = ?")
+            args.append(date)
+        if departure_station is not None:
+            conditions.append("dep_station = ?")
+            args.append(departure_station)
+        if arrival_station is not None:
+            conditions.append("arr_station = ?")
+            args.append(arrival_station)
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
         query += " ORDER BY dep_utc, flight_id"
         return [flight for row in self.connection.execute(query, args)
                 if (flight := self.get(row["flight_id"])) is not None]

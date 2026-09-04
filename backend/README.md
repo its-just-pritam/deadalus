@@ -282,10 +282,9 @@ and are not available yet.
 
 ### Flights and Network
 
-- <span style="color: goldenrod">[planned]</span> `GET /api/flights`
+- <span style="color: green">[implemented]</span> `GET /api/flights?date=&departureStation=&arrivalStation=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/flights/{flightId}`
-- <span style="color: goldenrod">[planned]</span> `GET /api/flights?date=&departureStation=&arrivalStation=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/flights/departures?date=&station=`
+- <span style="color: green">[implemented]</span> `GET /api/flights/departures?date=&station=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/flights/routes?date=&departureStation=&arrivalStation=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/flights/longest-block`
 - <span style="color: goldenrod">[planned]</span> `GET /api/stations`

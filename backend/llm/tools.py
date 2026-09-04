@@ -107,6 +107,22 @@ class RuleInput(BaseModel):
     rule_id: str = Field(description="Rule identifier, for example RULE-DUTY-02")
 
 
+class FlightSearchInput(BaseModel):
+    date: str = Field(description="UTC date in YYYY-MM-DD format")
+    departure_station: str = Field(
+        description="Departure station code, for example DEL"
+    )
+    arrival_station: str | None = Field(
+        default=None,
+        description="Optional arrival station code, for example BLR",
+    )
+
+
+class FlightDepartureInput(BaseModel):
+    date: str = Field(description="UTC date in YYYY-MM-DD format")
+    station: str = Field(description="Departure station code, for example DEL")
+
+
 def _list_reserves(base: str, date: str | None = None) -> str:
     return _get_json("list_reserves", "/api/reserves", {"base": base, "date": date})
 
@@ -140,6 +156,30 @@ def _get_duty_headroom(crew_id: str, as_of: str | None = None) -> str:
 
 def _get_rule(rule_id: str) -> str:
     return _get_json("get_rule", f"/api/rules/{rule_id}")
+
+
+def _list_flights(
+    date: str,
+    departure_station: str,
+    arrival_station: str | None = None,
+) -> str:
+    return _get_json(
+        "list_flights",
+        "/api/flights",
+        {
+            "date": date,
+            "departureStation": departure_station,
+            "arrivalStation": arrival_station,
+        },
+    )
+
+
+def _list_departures(date: str, station: str) -> str:
+    return _get_json(
+        "list_departures",
+        "/api/flights/departures",
+        {"date": date, "station": station},
+    )
 
 
 def get_retrieval_tools() -> list[StructuredTool]:
@@ -204,5 +244,22 @@ def get_retrieval_tools() -> list[StructuredTool]:
             name="get_rule",
             description="Retrieve the authoritative text and parameters for an operational rule.",
             args_schema=RuleInput,
+        ),
+        StructuredTool.from_function(
+            func=_list_flights,
+            name="list_flights",
+            description=(
+                "Retrieve authoritative flights filtered by UTC date and departure "
+                "station, optionally including arrival station."
+            ),
+            args_schema=FlightSearchInput,
+        ),
+        StructuredTool.from_function(
+            func=_list_departures,
+            name="list_departures",
+            description=(
+                "Retrieve all authoritative flights departing a station on a UTC date."
+            ),
+            args_schema=FlightDepartureInput,
         ),
     ]

@@ -56,3 +56,17 @@ class RuleResponse(BaseModel):
     rule_id: str
     text: str
     parameters: dict[str, float | int | None]
+
+
+class FlightResponse(BaseModel):
+    flight_id: str
+    flight_no: str
+    date: str
+    dep_station: str
+    arr_station: str
+    dep_utc: str
+    arr_utc: str
+    block_hours: float
+    aircraft: str
+    aircraft_type: str
+    seats: int
