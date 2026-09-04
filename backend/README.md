@@ -140,6 +140,36 @@ API exposes:
 - `GET /api/reserves/{crewId}/on-call-window` - one reserve's window.
 - `GET /api/crew/{crewId}` - crew profile, rank, and ratings.
 
+The LangChain agent is available through:
+
+- `POST /api/chat` - accepts `{"question": "..."}` and returns an LLM answer.
+
+The agent has three retrieval tools backed by the HTTP API: `list_reserves`,
+`get_crew_profile`, and `get_reserve_on_call_window`. Its system instructions
+require tool retrieval for operational facts rather than allowing the model to
+answer those facts from memory.
+
+Each retrieval call logs the tool name, HTTP path, query parameters, status, and
+duration. Response bodies and API keys are not logged. View these logs with:
+
+```bash
+docker compose logs -f api
+```
+
+Configure the required `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` values.
+Reasoning is enabled with OpenRouter's `extra_body` request option. The
+integration always uses `https://openrouter.ai/api/v1`. You may also configure
+`OPENROUTER_SITE_URL` and `OPENROUTER_SITE_NAME` for attribution. Install the
+dependencies from `requirements.txt`.
+
+Example:
+
+```bash
+curl -X POST http://localhost:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"question":"Which BLR reserves are available on 2026-09-15?"}'
+```
+
 To run the API in Docker, start the importer and API service:
 
 ```bash
