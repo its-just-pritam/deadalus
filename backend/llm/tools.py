@@ -156,6 +156,10 @@ def _get_on_call_window(crew_id: str) -> str:
     )
 
 
+def _get_reserve(crew_id: str) -> str:
+    return _get_json("get_reserve", f"/api/reserves/{crew_id}")
+
+
 def _get_duty_clock(crew_id: str) -> str:
     return _get_json("get_duty_clock", f"/api/crew/{crew_id}/duty-clock")
 
@@ -243,6 +247,15 @@ def get_retrieval_tools() -> list[StructuredTool]:
             description=(
                 "Retrieve one reserve crew member's authoritative UTC on-call window "
                 "from the operational API."
+            ),
+            args_schema=CrewInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_reserve,
+            name="get_reserve",
+            description=(
+                "Retrieve an authoritative reserve profile including base, dates, "
+                "on-call window, rank, ratings, and reachability."
             ),
             args_schema=CrewInput,
         ),

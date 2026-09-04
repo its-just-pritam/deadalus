@@ -28,6 +28,14 @@ class ReserveResponse(BaseModel):
     oncall_window_utc: OnCallWindowResponse | None
 
 
+class ReserveDetailResponse(ReserveResponse):
+    name: str
+    seniority: int
+    reachability_minutes: int
+    status: str
+    ratings: list[str]
+
+
 class DutyHistoryResponse(BaseModel):
     date: str
     duty_hours: float

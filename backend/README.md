@@ -307,7 +307,7 @@ and are not available yet.
 ### Reserves
 
 - <span style="color: green">[implemented]</span> `GET /api/reserves?date=&base=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/reserves/{crewId}`
+- <span style="color: green">[implemented]</span> `GET /api/reserves/{crewId}`
 - <span style="color: goldenrod">[planned]</span> `GET /api/reserves?date=&base=&rank=&calloutTime=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/reserves/available?date=&base=&rank=&reportTime=`
 - <span style="color: green">[implemented]</span> `GET /api/reserves/{crewId}/on-call-window`
