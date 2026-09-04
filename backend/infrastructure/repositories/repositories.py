@@ -272,6 +272,12 @@ class RulesetRepository:
             rules.append(Rule(row["rule_id"], row["text"], RuleParameters(**values)))
         return Ruleset(root["time_convention"], definitions, tuple(rules))
 
+    def get_rule(self, rule_id: str) -> Rule | None:
+        ruleset = self.get()
+        if ruleset is None:
+            return None
+        return next((rule for rule in ruleset.rules if rule.rule_id == rule_id), None)
+
 
 class QuestionRepository:
     def __init__(self, connection: sqlite3.Connection):

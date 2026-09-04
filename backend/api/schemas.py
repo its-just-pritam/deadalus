@@ -26,3 +26,33 @@ class ReserveResponse(BaseModel):
     note: str | None
     dates: list[str]
     oncall_window_utc: OnCallWindowResponse | None
+
+
+class DutyHistoryResponse(BaseModel):
+    date: str
+    duty_hours: float
+    flight_hours: float
+
+
+class DutyClockResponse(BaseModel):
+    crew_id: str
+    as_of_utc: str
+    duty_hours_7d: float
+    flight_hours_28d: float
+    last_rest_ended: str
+    daily_history: list[DutyHistoryResponse]
+
+
+class DutyHeadroomResponse(BaseModel):
+    crew_id: str
+    as_of_utc: str
+    duty_hours_7d: float
+    max_duty_hours_7d: float
+    headroom_hours: float
+    rule_id: str
+
+
+class RuleResponse(BaseModel):
+    rule_id: str
+    text: str
+    parameters: dict[str, float | int | None]

@@ -139,13 +139,18 @@ API exposes:
   including each reserve's on-call window.
 - `GET /api/reserves/{crewId}/on-call-window` - one reserve's window.
 - `GET /api/crew/{crewId}` - crew profile, rank, and ratings.
+- `GET /api/crew/{crewId}/duty-clock` - 7-day duty and 28-day flight snapshot.
+- `GET /api/crew/{crewId}/duty-history` - daily duty and flight-hour history.
+- `GET /api/duty-clocks/{crewId}/headroom?asOf=` - RULE-DUTY-02 headroom.
+- `GET /api/rules/{ruleId}` - rule text and parameters.
 
 The LangChain agent is available through:
 
 - `POST /api/chat` - accepts `{"question": "..."}` and returns an LLM answer.
 
-The agent has three retrieval tools backed by the HTTP API: `list_reserves`,
-`get_crew_profile`, and `get_reserve_on_call_window`. Its system instructions
+The agent has retrieval tools backed by the HTTP API, including
+`get_duty_clock`, `get_duty_history`, `get_duty_headroom`, and `get_rule` for
+Q02. Its system instructions
 require tool retrieval for operational facts rather than allowing the model to
 answer those facts from memory.
 
