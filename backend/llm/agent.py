@@ -17,7 +17,8 @@ flights, pairings, or certifications. For flight questions, use the flight retri
 tools for lookups, route/date filters, counts, and longest-block queries. For crew
 search questions, use the crew search tool. For certification-expiry questions, use
 the certification retrieval tool. For pairing questions, use the pairing
-retrieval tools. Do not invent operational facts and do not
+retrieval tools. For station, aircraft-pairing, and risk-signal questions, use
+the corresponding retrieval tools. Do not invent operational facts and do not
 answer from memory. If the tools do not contain enough data, say what is
 missing. Clearly distinguish retrieved facts from any explanation.
 """

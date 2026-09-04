@@ -276,7 +276,7 @@ and are not available yet.
 - <span style="color: goldenrod">[planned]</span> `GET /api/crew/{crewId}/certifications`
 - <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/duty-clock`
 - <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/duty-history`
-- <span style="color: goldenrod">[planned]</span> `GET /api/crew/{crewId}/risk-signal`
+- <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/risk-signal`
 - <span style="color: goldenrod">[planned]</span> `GET /api/crew/{crewId}/pairings`
 - <span style="color: green">[implemented]</span> `GET /api/crew/search?base=&rank=&status=&aircraftType=`
 
@@ -289,9 +289,9 @@ and are not available yet.
 - <span style="color: green">[implemented]</span> `GET /api/flights/count?date=`
 - <span style="color: green">[implemented]</span> `GET /api/flights/longest-block`
 - <span style="color: goldenrod">[planned]</span> `GET /api/stations`
-- <span style="color: goldenrod">[planned]</span> `GET /api/stations/{station}/nonstop-destinations`
+- <span style="color: green">[implemented]</span> `GET /api/stations/{station}/nonstop-destinations`
 - <span style="color: goldenrod">[planned]</span> `GET /api/aircraft/{aircraft}/schedule`
-- <span style="color: goldenrod">[planned]</span> `GET /api/aircraft/{aircraft}/pairings`
+- <span style="color: green">[implemented]</span> `GET /api/aircraft/{aircraft}/pairings`
 
 ### Rosters and Pairings
 

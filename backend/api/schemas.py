@@ -114,3 +114,15 @@ class PairingResponse(BaseModel):
     aircraft: str
     crew: list[PairingCrewResponse]
     days: list[PairingDayResponse]
+
+
+class RiskSignalResponse(BaseModel):
+    crew_id: str
+    as_of_utc: str
+    disruption_risk_score: float
+    drivers: list[str]
+
+
+class StationDestinationsResponse(BaseModel):
+    station: str
+    destinations: list[str]

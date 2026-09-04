@@ -162,6 +162,15 @@ class FlightDateInput(BaseModel):
     date: str
 
 
+class AircraftPairingInput(BaseModel):
+    aircraft: str = Field(description="Aircraft registration, for example VT-DXB")
+    date: str | None = Field(default=None, description="Optional UTC date in YYYY-MM-DD format")
+
+
+class StationInput(BaseModel):
+    station: str = Field(description="Station code, for example BLR")
+
+
 def _list_reserves(base: str, date: str | None = None) -> str:
     return _get_json("list_reserves", "/api/reserves", {"base": base, "date": date})
 
@@ -289,6 +298,25 @@ def _count_flights(date: str) -> str:
 
 def _get_longest_block() -> str:
     return _get_json("get_longest_block", "/api/flights/longest-block")
+
+
+def _list_aircraft_pairings(aircraft: str, date: str | None = None) -> str:
+    return _get_json(
+        "list_aircraft_pairings",
+        f"/api/aircraft/{aircraft}/pairings",
+        {"date": date},
+    )
+
+
+def _list_station_destinations(station: str) -> str:
+    return _get_json(
+        "list_station_destinations",
+        f"/api/stations/{station}/nonstop-destinations",
+    )
+
+
+def _get_risk_signal(crew_id: str) -> str:
+    return _get_json("get_risk_signal", f"/api/crew/{crew_id}/risk-signal")
 
 
 def get_retrieval_tools() -> list[StructuredTool]:
@@ -447,5 +475,23 @@ def get_retrieval_tools() -> list[StructuredTool]:
             func=_get_longest_block,
             name="get_longest_block",
             description="Retrieve the longest block time and all flight numbers with it.",
+        ),
+        StructuredTool.from_function(
+            func=_list_aircraft_pairings,
+            name="list_aircraft_pairings",
+            description="Retrieve authoritative pairings for an aircraft, optionally on a date.",
+            args_schema=AircraftPairingInput,
+        ),
+        StructuredTool.from_function(
+            func=_list_station_destinations,
+            name="list_station_destinations",
+            description="Retrieve authoritative nonstop destinations from a station.",
+            args_schema=StationInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_risk_signal,
+            name="get_risk_signal",
+            description="Retrieve the provided disruption-risk score and drivers for crew.",
+            args_schema=CrewInput,
         ),
     ]

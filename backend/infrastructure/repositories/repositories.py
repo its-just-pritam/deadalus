@@ -158,6 +158,14 @@ class FlightRepository:
         ]
         return block_hours, flights
 
+    def nonstop_destinations(self, *, departure_station: str) -> list[str]:
+        rows = self.connection.execute(
+            "SELECT DISTINCT arr_station FROM flights WHERE dep_station = ? "
+            "ORDER BY arr_station",
+            (departure_station,),
+        )
+        return [row["arr_station"] for row in rows]
+
 
 class PairingRepository:
     def __init__(self, connection: sqlite3.Connection):
@@ -189,6 +197,21 @@ class PairingRepository:
         return [pairing for row in self.connection.execute(
             "SELECT pairing_id FROM rosters_pairings ORDER BY pairing_id"
         ) if (pairing := self.get(row["pairing_id"])) is not None]
+
+    def list_by_aircraft(self, aircraft: str, *, date: str | None = None) -> list[Pairing]:
+        query = "SELECT pairing_id FROM rosters_pairings WHERE aircraft = ?"
+        args: list[str] = [aircraft]
+        if date is not None:
+            query += (
+                " AND EXISTS (SELECT 1 FROM rosters_pairings_days d "
+                "WHERE d.parent_id = rosters_pairings.id AND d.date = ?)"
+            )
+            args.append(date)
+        query += " ORDER BY pairing_id"
+        return [
+            pairing for row in self.connection.execute(query, args)
+            if (pairing := self.get(row["pairing_id"])) is not None
+        ]
 
 
 class RosterRepository:

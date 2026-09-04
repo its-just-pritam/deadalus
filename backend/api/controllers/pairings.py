@@ -2,7 +2,7 @@
 
 import sqlite3
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from backend.api.dependencies import get_connection
 from backend.api.schemas import (
@@ -36,6 +36,7 @@ def _pairing_response(pairing) -> PairingResponse:
 class PairingController:
     def __init__(self):
         self.router = APIRouter(prefix="/api/pairings", tags=["pairings"])
+        self.aircraft_router = APIRouter(prefix="/api/aircraft", tags=["pairings"])
         self.router.add_api_route(
             "/{pairing_id}/crew",
             self.get_crew,
@@ -47,6 +48,12 @@ class PairingController:
             self.get_pairing,
             methods=["GET"],
             response_model=PairingResponse,
+        )
+        self.aircraft_router.add_api_route(
+            "/{aircraft}/pairings",
+            self.list_aircraft_pairings,
+            methods=["GET"],
+            response_model=list[PairingResponse],
         )
 
     @staticmethod
@@ -71,3 +78,12 @@ class PairingController:
         connection: sqlite3.Connection = Depends(get_connection),
     ) -> list[PairingCrewResponse]:
         return _pairing_response(cls._get_pairing(pairing_id, connection)).crew
+
+    @staticmethod
+    def list_aircraft_pairings(
+        aircraft: str,
+        date: str | None = Query(default=None),
+        connection: sqlite3.Connection = Depends(get_connection),
+    ) -> list[PairingResponse]:
+        pairings = PairingRepository(connection).list_by_aircraft(aircraft, date=date)
+        return [_pairing_response(pairing) for pairing in pairings]

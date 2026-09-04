@@ -5,7 +5,11 @@ import sqlite3
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from backend.api.dependencies import get_connection
-from backend.api.schemas import FlightCountResponse, FlightResponse, LongestBlockResponse
+from backend.api.schemas import (
+    FlightCountResponse,
+    FlightResponse,
+    LongestBlockResponse,
+)
 from backend.infrastructure.repositories import FlightRepository
 
 
@@ -137,3 +141,4 @@ class FlightController:
     ) -> LongestBlockResponse:
         block_hours, flights = FlightRepository(connection).longest_block()
         return LongestBlockResponse(block_hours=block_hours, flights=flights)
+
