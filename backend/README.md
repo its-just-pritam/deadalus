@@ -297,8 +297,8 @@ and are not available yet.
 - <span style="color: goldenrod">[planned]</span> `GET /api/roster`
 - <span style="color: goldenrod">[planned]</span> `GET /api/roster/exceptions`
 - <span style="color: goldenrod">[planned]</span> `GET /api/pairings`
-- <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}`
-- <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/crew`
+- <span style="color: green">[implemented]</span> `GET /api/pairings/{pairingId}`
+- <span style="color: green">[implemented]</span> `GET /api/pairings/{pairingId}/crew`
 - <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/days`
 - <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/flights`
 - <span style="color: goldenrod">[planned]</span> `GET /api/pairings?date=&aircraft=&crewId=`

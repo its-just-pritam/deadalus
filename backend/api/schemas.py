@@ -85,3 +85,22 @@ class CertificationResponse(BaseModel):
     cert_type: str
     valid_from: str
     valid_to: str
+
+
+class PairingCrewResponse(BaseModel):
+    crew_id: str
+    role: str
+
+
+class PairingDayResponse(BaseModel):
+    date: str
+    report_utc: str
+    release_utc: str
+    flight_ids: list[str]
+
+
+class PairingResponse(BaseModel):
+    pairing_id: str
+    aircraft: str
+    crew: list[PairingCrewResponse]
+    days: list[PairingDayResponse]

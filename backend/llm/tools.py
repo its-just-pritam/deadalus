@@ -141,6 +141,10 @@ class CertificationRangeInput(BaseModel):
     )
 
 
+class PairingInput(BaseModel):
+    pairing_id: str = Field(description="Pairing identifier, for example P-2291")
+
+
 def _list_reserves(base: str, date: str | None = None) -> str:
     return _get_json("list_reserves", "/api/reserves", {"base": base, "date": date})
 
@@ -222,6 +226,14 @@ def _list_expiring_certifications(from_date: str, to_date: str) -> str:
         "/api/certifications/expiring",
         {"from": from_date, "to": to_date},
     )
+
+
+def _get_pairing(pairing_id: str) -> str:
+    return _get_json("get_pairing", f"/api/pairings/{pairing_id}")
+
+
+def _get_pairing_crew(pairing_id: str) -> str:
+    return _get_json("get_pairing_crew", f"/api/pairings/{pairing_id}/crew")
 
 
 def get_retrieval_tools() -> list[StructuredTool]:
@@ -336,5 +348,20 @@ def get_retrieval_tools() -> list[StructuredTool]:
                 "falls within an inclusive UTC date range."
             ),
             args_schema=CertificationRangeInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_pairing,
+            name="get_pairing",
+            description=(
+                "Retrieve an authoritative pairing including aircraft, assigned crew "
+                "roles, duty days, and flight IDs."
+            ),
+            args_schema=PairingInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_pairing_crew,
+            name="get_pairing_crew",
+            description="Retrieve the authoritative crew and roles assigned to a pairing.",
+            args_schema=PairingInput,
         ),
     ]
