@@ -31,6 +31,9 @@ services:
         condition: service_completed_successfully
     environment:
       CREW_OPERATIONS_DB: /var/lib/sqlite/crew_operations.db
+      OPENROUTER_API_KEY: 
+      OPENROUTER_MODEL: z-ai/glm-5.3-flash
+      CREW_OPERATIONS_API_URL: http://127.0.0.1:8000
     ports:
       - "8000:8000"
     volumes:
