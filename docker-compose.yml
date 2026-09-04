@@ -22,5 +22,19 @@ services:
     volumes:
       - sqlite_data:/var/lib/sqlite
 
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      sqlite-import:
+        condition: service_completed_successfully
+    environment:
+      CREW_OPERATIONS_DB: /var/lib/sqlite/crew_operations.db
+    ports:
+      - "8000:8000"
+    volumes:
+      - sqlite_data:/var/lib/sqlite:ro
+
 volumes:
   sqlite_data:

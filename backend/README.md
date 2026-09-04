@@ -124,14 +124,37 @@ crew = CrewRepository(connection).get("C-1042")
 Question prompts and scenario answer keys are reference/judging data and are
 intentionally not part of this operational model layer.
 
-The first implemented retrieval API is the Q01 reserve lookup. Create the
-dependency-free WSGI application with `create_app()` from
-`api/app.py`, passing the SQLite database path. It exposes:
+The first implemented retrieval API is the Q01 reserve lookup. Install the
+dependencies from `requirements.txt` and start FastAPI with:
+
+```bash
+pip install -r backend/requirements.txt
+uvicorn backend.api.main:app --reload
+```
+
+The SQLite path defaults to `crew_operations.db` at the repository root. The
+API exposes:
 
 - `GET /api/reserves?date=2026-09-15&base=BLR` - reserves active on the date,
   including each reserve's on-call window.
 - `GET /api/reserves/{crewId}/on-call-window` - one reserve's window.
 - `GET /api/crew/{crewId}` - crew profile, rank, and ratings.
+
+To run the API in Docker, start the importer and API service:
+
+```bash
+docker compose up --build api
+```
+
+The API is available at `http://localhost:8000`, with interactive
+documentation at `http://localhost:8000/docs`. The container reads the
+database from the shared `sqlite_data` volume and uses
+`CREW_OPERATIONS_DB=/var/lib/sqlite/crew_operations.db`.
+
+Routes are organized into resource-specific controller classes under
+`api/controllers/`: `CrewController` owns crew routes and `ReserveController`
+owns reserve and on-call-window routes. `api/main.py` only creates the FastAPI
+application and includes their routers.
 
 ### Physical Table Aggregation Map
 
