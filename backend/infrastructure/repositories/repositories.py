@@ -78,6 +78,16 @@ class FlightRepository:
             "dep_utc", "arr_utc", "block_hours", "aircraft", "aircraft_type",
             "seats")})
 
+    def get_by_number(self, flight_no: str, *, date: str | None = None) -> Flight | None:
+        query = "SELECT flight_id FROM flights WHERE flight_no = ?"
+        args: list[str] = [flight_no]
+        if date is not None:
+            query += " AND date = ?"
+            args.append(date)
+        query += " ORDER BY date LIMIT 1"
+        row = self.connection.execute(query, args).fetchone()
+        return self.get(row["flight_id"]) if row is not None else None
+
     def list(
         self,
         *,

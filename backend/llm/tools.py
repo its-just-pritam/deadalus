@@ -123,6 +123,15 @@ class FlightDepartureInput(BaseModel):
     station: str = Field(description="Departure station code, for example DEL")
 
 
+class FlightLookupInput(BaseModel):
+    flight_id: str = Field(
+        description="Flight number or stored flight ID, for example DX412"
+    )
+    date: str = Field(
+        description="Operating date in YYYY-MM-DD format, for example 2026-09-15"
+    )
+
+
 class CertificationRangeInput(BaseModel):
     from_date: str = Field(
         description="Inclusive start date in YYYY-MM-DD format, for example 2026-09-15"
@@ -188,6 +197,14 @@ def _list_departures(date: str, station: str) -> str:
         "list_departures",
         "/api/flights/departures",
         {"date": date, "station": station},
+    )
+
+
+def _get_flight(flight_id: str, date: str) -> str:
+    return _get_json(
+        "get_flight",
+        f"/api/flights/{flight_id}",
+        {"date": date},
     )
 
 
@@ -278,6 +295,15 @@ def get_retrieval_tools() -> list[StructuredTool]:
                 "Retrieve all authoritative flights departing a station on a UTC date."
             ),
             args_schema=FlightDepartureInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_flight,
+            name="get_flight",
+            description=(
+                "Retrieve one authoritative flight by flight number or stored flight ID. "
+                "Provide the operating date when using a flight number."
+            ),
+            args_schema=FlightLookupInput,
         ),
         StructuredTool.from_function(
             func=_list_expiring_certifications,

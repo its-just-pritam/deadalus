@@ -2,7 +2,7 @@
 
 import sqlite3
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from backend.api.dependencies import get_connection
 from backend.api.schemas import FlightResponse
@@ -40,6 +40,28 @@ class FlightController:
             methods=["GET"],
             response_model=list[FlightResponse],
         )
+        self.router.add_api_route(
+            "/{flight_id}",
+            self.get_flight,
+            methods=["GET"],
+            response_model=FlightResponse,
+        )
+
+    @staticmethod
+    def get_flight(
+        flight_id: str,
+        date: str | None = Query(default=None),
+        connection: sqlite3.Connection = Depends(get_connection),
+    ) -> FlightResponse:
+        repository = FlightRepository(connection)
+        flight = repository.get(flight_id)
+        if flight is None:
+            flight = repository.get_by_number(flight_id, date=date)
+        elif date is not None and flight.date != date:
+            flight = None
+        if flight is None:
+            raise HTTPException(status_code=404, detail="Flight not found")
+        return _flight_response(flight)
 
     @staticmethod
     def list_flights(
