@@ -1,0 +1,282 @@
+# Crew Operations Backend
+
+Backend for the AI-assisted airline crew control decision-support system described in [problem-guide.md](../problem-guide.md).
+
+## Status
+
+Initial modular-monolith structure created. A Docker Compose importer now loads the repository's JSON data into a persistent SQLite database volume.
+
+## Architecture
+
+The backend keeps operational authority in deterministic domain services. The LLM is responsible for natural-language understanding, tool selection, and explanation of verified results. It must not calculate aviation legality or invent crew assignments.
+
+```text
+API / Conversational Controller
+        |
+Application Services
+        |
+Domain Services and Rules Engine
+        |
+Repositories / SQLite
+```
+
+## Directory Structure
+
+```text
+backend/
+  api/                         HTTP and conversational endpoints
+  application/                 Use-case orchestration
+  domain/
+    crew/                      Crew profiles and availability
+    flights/                   Flight schedules and aircraft
+    pairings/                  Crew pairing relationships
+    reserves/                  Reserve pool operations
+    rules/                     Duty, rest, qualification, and base rules
+    recommendations/           Candidate evaluation and ranking
+  infrastructure/
+    database/                  SQLite setup and migrations
+    repositories/              Data access implementations
+  llm/                         LLM adapter and verified-result explanations
+  tests/                       Unit and integration tests
+```
+
+## Planned Core Services
+
+- `ImpactAnalyzer`: identifies pairings and flights affected by crew absence.
+- `RulesEngine`: applies the seven operational rules deterministically.
+- `CandidateEvaluator`: validates reserve candidates and records violations.
+- `CostCalculator`: estimates replacement, deadhead, and delay costs.
+- `RecommendationEngine`: ranks legal candidates by cost, coverage, and impact.
+- `AuditService`: records facts, rules checked, calculations, and decisions.
+
+## Key Workflow
+
+```text
+Crew absence
+  -> Impact analysis
+  -> Pairing expansion
+  -> Affected flights
+  -> Reserve search
+  -> Candidate evaluation
+  -> Rules validation
+  -> Cost and coverage calculation
+  -> Ranked recommendations
+  -> LLM explanation
+```
+
+## Data Sources
+
+The SQLite database is initialized from the JSON files in the repository's `data/` directory. Scalar fields become typed columns. Nested objects and arrays become child tables with a `parent_id` foreign key and an `id` primary key. For example, `crew.ratings` is imported into `crew_ratings`, and `pairings.days` is imported into `rosters_pairings_days`. The `questions.expected_answer` value is intentionally kept as serialized JSON in one column because it is reference content rather than operational data that needs relational queries.
+
+Natural identifier fields such as `crew_id`, `flight_id`, and `pairing_id` are retained as unique columns. Where the target table is known, these fields also receive foreign keys. Apart from the intentional `questions.expected_answer` exception, no source JSON is stored in a database cell.
+
+## Database Import
+
+SQLite is an embedded database and does not run as a network server. The Compose service is therefore a one-shot importer that writes the database to the persistent `sqlite_data` volume.
+
+From the repository root, run:
+
+```bash
+docker compose up sqlite-web
+```
+
+This imports the JSON files and starts the SQLite web server at [http://localhost:8080](http://localhost:8080). The generated database is stored inside the Docker volume at `/var/lib/sqlite/crew_operations.db`.
+
+To import updated JSON files, rerun the importer before starting the web service:
+
+```bash
+docker compose run --rm sqlite-import
+docker compose up sqlite-web
+```
+
+The importer replaces the imported tables on each run, making the command repeatable when the JSON data changes. SQLite remains an embedded database; `sqlite-web` provides browser-based access rather than a database wire-protocol server.
+
+## Development Notes
+
+- Prefer a modular monolith for this prototype.
+- Keep legality calculations deterministic, auditable, and testable.
+- Treat unknown or missing operational data as unresolved, not legal.
+- Keep `docker-compose.yml` and the JSON importer updated when database setup changes.
+- Update this README when backend structure, services, APIs, data schema, or setup instructions change.
+
+## Data Model
+
+The database-independent entities live in `domain/entities.py`. They cover the
+operational tables in `crew_operations.db`: `Crew`, `Flight`, `Pairing`,
+`Reserve`, `Certification`, `DutyClock`, `RiskSignal`, `CostConfig`, `Rule`
+and `Scenario`. Nested JSON data is represented as immutable tuples on the
+parent entity.
+
+SQLite implementations are in
+`infrastructure/repositories/repositories.py`. Each repository accepts a
+`sqlite3.Connection`, returns entities rather than database rows, and hides the
+generated `parent_id` relationships. Use the connection factory to ensure
+row-oriented access and foreign-key enforcement:
+
+```python
+from backend.infrastructure.database.connection import connect
+from backend.infrastructure.repositories import CrewRepository
+
+connection = connect("crew_operations.db")
+crew = CrewRepository(connection).get("C-1042")
+```
+
+Question prompts and scenario answer keys are reference/judging data and are
+intentionally not part of this operational model layer.
+
+The first implemented retrieval API is the Q01 reserve lookup. Create the
+dependency-free WSGI application with `create_app()` from
+`api/app.py`, passing the SQLite database path. It exposes:
+
+- `GET /api/reserves?date=2026-09-15&base=BLR` - reserves active on the date,
+  including each reserve's on-call window.
+- `GET /api/reserves/{crewId}/on-call-window` - one reserve's window.
+- `GET /api/crew/{crewId}` - crew profile, rank, and ratings.
+
+### Physical Table Aggregation Map
+
+The importer creates 51 physical tables. Repositories aggregate them into the
+following API-facing entities:
+
+| Physical table | Aggregated entity / property |
+|---|---|
+| `crew` | `Crew` |
+| `crew_ratings` | `Crew.ratings` |
+| `certifications` | `Certification` |
+| `flights` | `Flight` |
+| `rosters` | `Roster` |
+| `rosters_pairings` | `Roster.pairings` (`Pairing`) |
+| `rosters_pairings_crew` | `Pairing.crew` (`PairingCrew`) |
+| `rosters_pairings_days` | `Pairing.days` (`PairingDay`) |
+| `rosters_pairings_days_flights` | `PairingDay.flight_ids` |
+| `rosters_flagged_exceptions` | `Roster.flagged_exceptions` |
+| `reserve_pool` | `Reserve` |
+| `reserve_pool_dates` | `Reserve.dates` |
+| `reserve_pool_oncall_window_utc` | `Reserve.oncall_window_utc` |
+| `duty_clocks` | `DutyClock` |
+| `duty_clocks_daily_history` | `DutyClock.daily_history` (`DutyHistory`) |
+| `risk_signals` | `RiskSignal` |
+| `risk_signals_drivers` | `RiskSignal.drivers` |
+| `costs` | `CostConfig` |
+| `rules` | `Ruleset` |
+| `rules_definitions` | `Ruleset.definitions` |
+| `rules_rules` | `Ruleset.rules` (`Rule`) |
+| `rules_rules_params` | `Rule.parameters` (`RuleParameters`) |
+| `questions` | `Question` |
+| `questions_rules_ref` | `Question.rules_ref` |
+| `scenarios` | `Scenario` |
+| `scenarios_event` | `Scenario.event` (`ScenarioEvent`) |
+| `scenarios_event_events` | `Scenario.event.events` |
+| `scenarios_event_window_utc` | `Scenario.event.window_utc` |
+| `scenarios_answer_key` | `Scenario.answer_key` (`ScenarioAnswerKey`) |
+| `scenarios_answer_key_affected_flights` | `ScenarioAnswerKey.affected_flights` |
+| `scenarios_answer_key_uncovered_flights` | `ScenarioAnswerKey.uncovered_flights` |
+| `scenarios_answer_key_uncovered_flights_day1` | `ScenarioAnswerKey.uncovered_flights_day1` |
+| `scenarios_answer_key_uncovered_flights_day2` | `ScenarioAnswerKey.uncovered_flights_day2` |
+| `scenarios_answer_key_options` | `ScenarioAnswerKey.options` (`ScenarioOption`) |
+| `scenarios_answer_key_options_rules_checked` | `ScenarioOption.rules_checked` |
+| `scenarios_answer_key_options_dxa` | Scenario answer-key DXA options |
+| `scenarios_answer_key_options_dxa_rules_checked` | DXA option `rules_checked` |
+| `scenarios_answer_key_options_dxb` | Scenario answer-key DXB options |
+| `scenarios_answer_key_options_dxb_rules_checked` | DXB option `rules_checked` |
+| `scenarios_answer_key_expected_choice` | `ScenarioAnswerKey.expected_choice` |
+| `scenarios_answer_key_expected_choice_rules_checked` | Expected choice `rules_checked` |
+| `scenarios_answer_key_excluded_candidates` | `ScenarioAnswerKey.excluded_candidates` |
+| `scenarios_answer_key_excluded_dxa` | `ScenarioAnswerKey.excluded_dxa` |
+| `scenarios_answer_key_excluded_dxb` | `ScenarioAnswerKey.excluded_dxb` |
+| `scenarios_answer_key_illegal_assignment` | `ScenarioAnswerKey.illegal_assignment` |
+| `scenarios_answer_key_per_flight_assessment` | `ScenarioAnswerKey.per_flight_assessment` |
+| `scenarios_answer_key_optimal_joint_plan` | Joint-plan total cost |
+| `scenarios_answer_key_optimal_joint_plan_assign_dxa` | Optimal joint-plan DXA assignment |
+| `scenarios_answer_key_optimal_joint_plan_assign_dxa_rules_checked` | DXA assignment `rules_checked` |
+| `scenarios_answer_key_optimal_joint_plan_assign_dxb` | Optimal joint-plan DXB assignment |
+| `scenarios_answer_key_optimal_joint_plan_assign_dxb_rules_checked` | DXB assignment `rules_checked` |
+
+## Proposed Data Retrieval APIs
+
+These endpoints are recommended to support the 38 questions in
+`data/questions.json`. They are an API design reference only; they are not
+implemented yet.
+
+### Reference Data
+
+- `GET /api/questions`
+- `GET /api/questions/{questionId}`
+- `GET /api/rules`
+- `GET /api/rules/{ruleId}`
+- `GET /api/costs`
+- `GET /api/scenarios`
+- `GET /api/scenarios/{scenarioId}`
+
+### Crew
+
+- `GET /api/crew`
+- `GET /api/crew/{crewId}`
+- `GET /api/crew/{crewId}/ratings`
+- `GET /api/crew/{crewId}/certifications`
+- `GET /api/crew/{crewId}/duty-clock`
+- `GET /api/crew/{crewId}/duty-history`
+- `GET /api/crew/{crewId}/risk-signal`
+- `GET /api/crew/{crewId}/pairings`
+- `GET /api/crew/search?base=&rank=&status=&aircraftType=`
+
+### Flights and Network
+
+- `GET /api/flights`
+- `GET /api/flights/{flightId}`
+- `GET /api/flights?date=&departureStation=&arrivalStation=`
+- `GET /api/flights/departures?date=&station=`
+- `GET /api/flights/routes?date=&departureStation=&arrivalStation=`
+- `GET /api/flights/longest-block`
+- `GET /api/stations`
+- `GET /api/stations/{station}/nonstop-destinations`
+- `GET /api/aircraft/{aircraft}/schedule`
+- `GET /api/aircraft/{aircraft}/pairings`
+
+### Rosters and Pairings
+
+- `GET /api/roster`
+- `GET /api/roster/exceptions`
+- `GET /api/pairings`
+- `GET /api/pairings/{pairingId}`
+- `GET /api/pairings/{pairingId}/crew`
+- `GET /api/pairings/{pairingId}/days`
+- `GET /api/pairings/{pairingId}/flights`
+- `GET /api/pairings?date=&aircraft=&crewId=`
+- `GET /api/pairings/{pairingId}/crew/{crewId}`
+
+### Reserves
+
+- `GET /api/reserves`
+- `GET /api/reserves/{crewId}`
+- `GET /api/reserves?date=&base=&rank=&calloutTime=`
+- `GET /api/reserves/available?date=&base=&rank=&reportTime=`
+- `GET /api/reserves/{crewId}/on-call-window`
+
+### Operational Queries
+
+- `GET /api/duty-clocks/{crewId}/headroom?asOf=`
+- `GET /api/duty-clocks/at-risk?date=&minimumDutyHours=`
+- `GET /api/certifications/expiring?from=&to=`
+- `GET /api/assignments/{pairingId}/crew-impact?crewId=&date=`
+- `GET /api/flights/{flightId}/passenger-impact`
+- `GET /api/flights/affected?station=&from=&to=`
+- `GET /api/flights/{flightId}/cancellation-impact`
+- `GET /api/crew/{crewId}/qualification?aircraftType=&date=`
+- `GET /api/crew/{crewId}/legality?pairingId=&date=`
+- `GET /api/pairings/{pairingId}/legality?crewId=&date=&delayHours=`
+- `GET /api/pairings/{pairingId}/rest-check?crewId=&date=`
+- `GET /api/pairings/{pairingId}/duty-check?crewId=&from=&to=`
+- `GET /api/pairings/{pairingId}/fdp-check?crewId=&date=&delayHours=`
+
+### Disruption and Recovery
+
+- `GET /api/disruptions/affected-flights?station=&from=&to=`
+- `GET /api/disruptions/affected-pairings?station=&from=&to=`
+- `GET /api/disruptions/uncrewed-flights?crewId=&pairingId=&date=`
+- `GET /api/recovery/candidates?pairingId=&crewRole=&date=`
+- `GET /api/recovery/options?pairingId=&crewId=&date=`
+- `GET /api/recovery/ranked-options?pairingId=&from=&to=`
+- `GET /api/recovery/joint-plan?aircrafts=&date=`
+- `GET /api/recovery/briefing?date=`
+- `GET /api/aircraft/{aircraft}/morning-briefing?date=`

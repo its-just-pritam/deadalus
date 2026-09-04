@@ -1,0 +1,26 @@
+services:
+  sqlite-import:
+    image: python:3.12-alpine
+    working_dir: /app
+    command: python /app/import_json.py
+    volumes:
+      - ./data:/data:ro
+      - ./backend/infrastructure/database:/app:ro
+      - sqlite_data:/var/lib/sqlite
+
+  sqlite-web:
+    image: python:3.12-alpine
+    working_dir: /var/lib/sqlite
+    command: >-
+      sh -c "pip install --no-cache-dir sqlite-web
+      && sqlite_web --host 0.0.0.0 --port 8080 crew_operations.db"
+    depends_on:
+      sqlite-import:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    volumes:
+      - sqlite_data:/var/lib/sqlite
+
+volumes:
+  sqlite_data:
