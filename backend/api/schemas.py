@@ -126,3 +126,38 @@ class RiskSignalResponse(BaseModel):
 class StationDestinationsResponse(BaseModel):
     station: str
     destinations: list[str]
+
+
+class UncrewedFlightsResponse(BaseModel):
+    crew_id: str
+    pairing_id: str
+    day1: list[str]
+    day2_also_at_risk: list[str]
+    passengers_day1: int
+
+
+class LegalityResponse(BaseModel):
+    crew_id: str
+    pairing_id: str
+    legal: bool
+    issues: list[str]
+
+
+class AffectedFlightResponse(BaseModel):
+    flight_id: str
+    flight_no: str
+    date: str
+    dep_station: str
+    arr_station: str
+    dep_utc: str
+    arr_utc: str
+
+
+class FdpCheckResponse(BaseModel):
+    aircraft: str
+    date: str
+    delay_hours: float
+    sectors: int
+    fdp_after_delay: float
+    fdp_limit: float
+    breach: bool

@@ -166,6 +166,18 @@ class FlightRepository:
         )
         return [row["arr_station"] for row in rows]
 
+    def affected_by_station_window(
+        self, *, station: str, from_utc: str, to_utc: str
+    ) -> list[Flight]:
+        rows = self.connection.execute(
+            "SELECT flight_id FROM flights WHERE "
+            "((dep_station = ? AND dep_utc >= ? AND dep_utc <= ?) OR "
+            "(arr_station = ? AND arr_utc >= ? AND arr_utc <= ?)) "
+            "ORDER BY dep_utc, flight_id",
+            (station, from_utc, to_utc, station, from_utc, to_utc),
+        )
+        return [flight for row in rows if (flight := self.get(row["flight_id"]))]
+
 
 class PairingRepository:
     def __init__(self, connection: sqlite3.Connection):
@@ -210,6 +222,16 @@ class PairingRepository:
         query += " ORDER BY pairing_id"
         return [
             pairing for row in self.connection.execute(query, args)
+            if (pairing := self.get(row["pairing_id"])) is not None
+        ]
+
+    def list_by_date(self, date: str) -> list[Pairing]:
+        return [
+            pairing for row in self.connection.execute(
+                "SELECT DISTINCT p.pairing_id FROM rosters_pairings p "
+                "JOIN rosters_pairings_days d ON d.parent_id = p.id WHERE d.date = ?",
+                (date,),
+            )
             if (pairing := self.get(row["pairing_id"])) is not None
         ]
 

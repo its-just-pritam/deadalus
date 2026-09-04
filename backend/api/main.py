@@ -12,6 +12,7 @@ from backend.api.controllers.risk_signals import RiskSignalController
 from backend.api.controllers.reserves import ReserveController
 from backend.api.controllers.rules import RuleController
 from backend.api.controllers.stations import StationController
+from backend.api.controllers.operational import OperationalController
 
 
 app = FastAPI(
@@ -23,6 +24,7 @@ app = FastAPI(
 app.include_router(CrewController().router)
 app.include_router(CertificationController().router)
 app.include_router(DutyClockController().router)
+app.include_router(OperationalController().router)
 app.include_router(FlightController().router)
 app.include_router(PairingController().router)
 app.include_router(PairingController().aircraft_router)

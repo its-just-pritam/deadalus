@@ -320,14 +320,14 @@ and are not available yet.
 - <span style="color: green">[implemented]</span> `GET /api/certifications/expiring?from=&to=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/assignments/{pairingId}/crew-impact?crewId=&date=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/flights/{flightId}/passenger-impact`
-- <span style="color: goldenrod">[planned]</span> `GET /api/flights/affected?station=&from=&to=`
+- <span style="color: green">[implemented]</span> `GET /api/flights/affected?station=&from=&to=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/flights/{flightId}/cancellation-impact`
 - <span style="color: goldenrod">[planned]</span> `GET /api/crew/{crewId}/qualification?aircraftType=&date=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/crew/{crewId}/legality?pairingId=&date=`
+- <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/legality?pairingId=&date=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/legality?crewId=&date=&delayHours=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/rest-check?crewId=&date=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/duty-check?crewId=&from=&to=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/fdp-check?crewId=&date=&delayHours=`
+- <span style="color: green">[implemented]</span> `GET /api/pairings/{pairingId}/fdp-check?crewId=&date=&delayHours=`
 
 ### Disruption and Recovery
 

@@ -171,6 +171,31 @@ class StationInput(BaseModel):
     station: str = Field(description="Station code, for example BLR")
 
 
+class UncrewedFlightsInput(BaseModel):
+    crew_id: str
+    pairing_id: str
+    date: str
+
+
+class CrewLegalityInput(BaseModel):
+    crew_id: str
+    pairing_id: str
+    date: str
+
+
+class AffectedFlightsInput(BaseModel):
+    station: str
+    from_utc: str
+    to_utc: str
+
+
+class FdpCheckInput(BaseModel):
+    pairing_id: str
+    crew_id: str
+    date: str
+    delay_hours: float = 0.0
+
+
 def _list_reserves(base: str, date: str | None = None) -> str:
     return _get_json("list_reserves", "/api/reserves", {"base": base, "date": date})
 
@@ -317,6 +342,38 @@ def _list_station_destinations(station: str) -> str:
 
 def _get_risk_signal(crew_id: str) -> str:
     return _get_json("get_risk_signal", f"/api/crew/{crew_id}/risk-signal")
+
+
+def _get_uncrewed_flights(crew_id: str, pairing_id: str, date: str) -> str:
+    return _get_json(
+        "get_uncrewed_flights",
+        "/api/disruptions/uncrewed-flights",
+        {"crewId": crew_id, "pairingId": pairing_id, "date": date},
+    )
+
+
+def _check_crew_legality(crew_id: str, pairing_id: str, date: str) -> str:
+    return _get_json(
+        "check_crew_legality",
+        f"/api/crew/{crew_id}/legality",
+        {"pairingId": pairing_id, "date": date},
+    )
+
+
+def _get_affected_flights(station: str, from_utc: str, to_utc: str) -> str:
+    return _get_json(
+        "get_affected_flights",
+        "/api/flights/affected",
+        {"station": station, "from": from_utc, "to": to_utc},
+    )
+
+
+def _check_fdp(pairing_id: str, crew_id: str, date: str, delay_hours: float = 0.0) -> str:
+    return _get_json(
+        "check_fdp",
+        f"/api/pairings/{pairing_id}/fdp-check",
+        {"crewId": crew_id, "date": date, "delayHours": str(delay_hours)},
+    )
 
 
 def get_retrieval_tools() -> list[StructuredTool]:
@@ -493,5 +550,29 @@ def get_retrieval_tools() -> list[StructuredTool]:
             name="get_risk_signal",
             description="Retrieve the provided disruption-risk score and drivers for crew.",
             args_schema=CrewInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_uncrewed_flights,
+            name="get_uncrewed_flights",
+            description="Determine flights at risk when a crew member is absent from a pairing.",
+            args_schema=UncrewedFlightsInput,
+        ),
+        StructuredTool.from_function(
+            func=_check_crew_legality,
+            name="check_crew_legality",
+            description="Check a crew member's duty legality for a pairing from a date.",
+            args_schema=CrewLegalityInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_affected_flights,
+            name="get_affected_flights",
+            description="Find flights departing or arriving at a station during a UTC closure window.",
+            args_schema=AffectedFlightsInput,
+        ),
+        StructuredTool.from_function(
+            func=_check_fdp,
+            name="check_fdp",
+            description="Check FDP after delay against RULE-FDP-01 for a pairing duty.",
+            args_schema=FdpCheckInput,
         ),
     ]
