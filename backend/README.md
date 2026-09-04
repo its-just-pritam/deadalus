@@ -154,6 +154,11 @@ Q02. Its system instructions
 require tool retrieval for operational facts rather than allowing the model to
 answer those facts from memory.
 
+Reserve-window interpretation: the window constrains when a reserve may be
+called, not the scheduled report time. Reachability determines whether a call
+made within the window can support the report. A report after the window ends
+is not, by itself, an on-call violation.
+
 Each retrieval call logs the tool name, HTTP path, query parameters, status, and
 duration. Response bodies and API keys are not logged. View these logs with:
 
@@ -272,34 +277,34 @@ and are not available yet.
 
 - <span style="color: goldenrod">[planned]</span> `GET /api/crew`
 - <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}`
-- <span style="color: goldenrod">[planned]</span> `GET /api/crew/{crewId}/ratings`
+- <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/ratings`
 - <span style="color: goldenrod">[planned]</span> `GET /api/crew/{crewId}/certifications`
 - <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/duty-clock`
 - <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/duty-history`
-- <span style="color: goldenrod">[planned]</span> `GET /api/crew/{crewId}/risk-signal`
+- <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/risk-signal`
 - <span style="color: goldenrod">[planned]</span> `GET /api/crew/{crewId}/pairings`
-- <span style="color: goldenrod">[planned]</span> `GET /api/crew/search?base=&rank=&status=&aircraftType=`
+- <span style="color: green">[implemented]</span> `GET /api/crew/search?base=&rank=&status=&aircraftType=`
 
 ### Flights and Network
 
-- <span style="color: goldenrod">[planned]</span> `GET /api/flights`
-- <span style="color: goldenrod">[planned]</span> `GET /api/flights/{flightId}`
-- <span style="color: goldenrod">[planned]</span> `GET /api/flights?date=&departureStation=&arrivalStation=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/flights/departures?date=&station=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/flights/routes?date=&departureStation=&arrivalStation=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/flights/longest-block`
+- <span style="color: green">[implemented]</span> `GET /api/flights?date=&departureStation=&arrivalStation=`
+- <span style="color: green">[implemented]</span> `GET /api/flights/{flightId}`
+- <span style="color: green">[implemented]</span> `GET /api/flights/departures?date=&station=`
+- <span style="color: green">[implemented]</span> `GET /api/flights/routes?date=&departureStation=&arrivalStation=`
+- <span style="color: green">[implemented]</span> `GET /api/flights/count?date=`
+- <span style="color: green">[implemented]</span> `GET /api/flights/longest-block`
 - <span style="color: goldenrod">[planned]</span> `GET /api/stations`
-- <span style="color: goldenrod">[planned]</span> `GET /api/stations/{station}/nonstop-destinations`
+- <span style="color: green">[implemented]</span> `GET /api/stations/{station}/nonstop-destinations`
 - <span style="color: goldenrod">[planned]</span> `GET /api/aircraft/{aircraft}/schedule`
-- <span style="color: goldenrod">[planned]</span> `GET /api/aircraft/{aircraft}/pairings`
+- <span style="color: green">[implemented]</span> `GET /api/aircraft/{aircraft}/pairings`
 
 ### Rosters and Pairings
 
 - <span style="color: goldenrod">[planned]</span> `GET /api/roster`
 - <span style="color: goldenrod">[planned]</span> `GET /api/roster/exceptions`
 - <span style="color: goldenrod">[planned]</span> `GET /api/pairings`
-- <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}`
-- <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/crew`
+- <span style="color: green">[implemented]</span> `GET /api/pairings/{pairingId}`
+- <span style="color: green">[implemented]</span> `GET /api/pairings/{pairingId}/crew`
 - <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/days`
 - <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/flights`
 - <span style="color: goldenrod">[planned]</span> `GET /api/pairings?date=&aircraft=&crewId=`
@@ -308,7 +313,7 @@ and are not available yet.
 ### Reserves
 
 - <span style="color: green">[implemented]</span> `GET /api/reserves?date=&base=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/reserves/{crewId}`
+- <span style="color: green">[implemented]</span> `GET /api/reserves/{crewId}`
 - <span style="color: goldenrod">[planned]</span> `GET /api/reserves?date=&base=&rank=&calloutTime=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/reserves/available?date=&base=&rank=&reportTime=`
 - <span style="color: green">[implemented]</span> `GET /api/reserves/{crewId}/on-call-window`
@@ -317,17 +322,18 @@ and are not available yet.
 
 - <span style="color: green">[implemented]</span> `GET /api/duty-clocks/{crewId}/headroom?asOf=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/duty-clocks/at-risk?date=&minimumDutyHours=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/certifications/expiring?from=&to=`
+- <span style="color: green">[implemented]</span> `GET /api/certifications/expiring?from=&to=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/assignments/{pairingId}/crew-impact?crewId=&date=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/flights/{flightId}/passenger-impact`
-- <span style="color: goldenrod">[planned]</span> `GET /api/flights/affected?station=&from=&to=`
+- <span style="color: green">[implemented]</span> `GET /api/flights/affected?station=&from=&to=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/flights/{flightId}/cancellation-impact`
-- <span style="color: goldenrod">[planned]</span> `GET /api/crew/{crewId}/qualification?aircraftType=&date=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/crew/{crewId}/legality?pairingId=&date=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/legality?crewId=&date=&delayHours=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/rest-check?crewId=&date=`
+- <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/qualification?aircraftType=&date=`
+- <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/legality?pairingId=&date=`
+- <span style="color: green">[implemented]</span> `GET /api/pairings/{pairingId}/legality?crewId=&date=&delayHours=`
+- <span style="color: green">[implemented]</span> `GET /api/pairings/{pairingId}/rest-check?crewId=&date=`
+- <span style="color: green">[implemented]</span> `GET /api/rest-check?releaseUtc=&crewId=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/duty-check?crewId=&from=&to=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/pairings/{pairingId}/fdp-check?crewId=&date=&delayHours=`
+- <span style="color: green">[implemented]</span> `GET /api/pairings/{pairingId}/fdp-check?crewId=&date=&delayHours=`
 
 ### Disruption and Recovery
 

@@ -1,5 +1,7 @@
 """Read repositories over the generated crew_operations SQLite schema."""
 
+from __future__ import annotations
+
 import json
 import sqlite3
 from typing import Any
@@ -52,12 +54,34 @@ class CrewRepository:
             ratings=tuple(item["value"] for item in ratings),
         )
 
-    def list(self, *, status: str | None = None) -> list[Crew]:
+    def list(
+        self,
+        *,
+        status: str | None = None,
+        base: str | None = None,
+        rank: str | None = None,
+        aircraft_type: str | None = None,
+    ) -> list[Crew]:
         query = "SELECT crew_id FROM crew"
-        args: tuple[Any, ...] = ()
+        conditions: list[str] = []
+        args: list[str] = []
         if status is not None:
-            query += " WHERE status = ?"
-            args = (status,)
+            conditions.append("status = ?")
+            args.append(status)
+        if base is not None:
+            conditions.append("base = ?")
+            args.append(base)
+        if rank is not None:
+            conditions.append("rank = ?")
+            args.append(rank)
+        if aircraft_type is not None:
+            conditions.append(
+                "EXISTS (SELECT 1 FROM crew_ratings r "
+                "WHERE r.parent_id = crew.id AND r.value = ?)"
+            )
+            args.append(aircraft_type)
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
         query += " ORDER BY crew_id"
         return [crew for row in self.connection.execute(query, args)
                 if (crew := self.get(row["crew_id"])) is not None]
@@ -78,15 +102,81 @@ class FlightRepository:
             "dep_utc", "arr_utc", "block_hours", "aircraft", "aircraft_type",
             "seats")})
 
-    def list(self, *, date: str | None = None) -> list[Flight]:
-        query = "SELECT flight_id FROM flights"
-        args: tuple[Any, ...] = ()
+    def get_by_number(self, flight_no: str, *, date: str | None = None) -> Flight | None:
+        query = "SELECT flight_id FROM flights WHERE flight_no = ?"
+        args: list[str] = [flight_no]
         if date is not None:
-            query += " WHERE date = ?"
-            args = (date,)
+            query += " AND date = ?"
+            args.append(date)
+        query += " ORDER BY date LIMIT 1"
+        row = self.connection.execute(query, args).fetchone()
+        return self.get(row["flight_id"]) if row is not None else None
+
+    def list(
+        self,
+        *,
+        date: str | None = None,
+        departure_station: str | None = None,
+        arrival_station: str | None = None,
+    ) -> list[Flight]:
+        query = "SELECT flight_id FROM flights"
+        conditions: list[str] = []
+        args: list[str] = []
+        if date is not None:
+            conditions.append("date = ?")
+            args.append(date)
+        if departure_station is not None:
+            conditions.append("dep_station = ?")
+            args.append(departure_station)
+        if arrival_station is not None:
+            conditions.append("arr_station = ?")
+            args.append(arrival_station)
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
         query += " ORDER BY dep_utc, flight_id"
         return [flight for row in self.connection.execute(query, args)
                 if (flight := self.get(row["flight_id"])) is not None]
+
+    def count(self, *, date: str) -> int:
+        row = self.connection.execute(
+            "SELECT COUNT(*) AS count FROM flights WHERE date = ?", (date,)
+        ).fetchone()
+        return int(row["count"])
+
+    def longest_block(self) -> tuple[float, list[str]]:
+        row = self.connection.execute(
+            "SELECT MAX(block_hours) AS block_hours FROM flights"
+        ).fetchone()
+        block_hours = float(row["block_hours"])
+        flights = [
+            item["flight_no"]
+            for item in self.connection.execute(
+                "SELECT flight_no FROM flights WHERE block_hours = ? "
+                    "GROUP BY flight_no ORDER BY flight_no",
+                (block_hours,),
+            )
+        ]
+        return block_hours, flights
+
+    def nonstop_destinations(self, *, departure_station: str) -> list[str]:
+        rows = self.connection.execute(
+            "SELECT DISTINCT arr_station FROM flights WHERE dep_station = ? "
+            "ORDER BY arr_station",
+            (departure_station,),
+        )
+        return [row["arr_station"] for row in rows]
+
+    def affected_by_station_window(
+        self, *, station: str, from_utc: str, to_utc: str
+    ) -> list[Flight]:
+        rows = self.connection.execute(
+            "SELECT flight_id FROM flights WHERE "
+            "((dep_station = ? AND dep_utc >= ? AND dep_utc <= ?) OR "
+            "(arr_station = ? AND arr_utc >= ? AND arr_utc <= ?)) "
+            "ORDER BY dep_utc, flight_id",
+            (station, from_utc, to_utc, station, from_utc, to_utc),
+        )
+        return [flight for row in rows if (flight := self.get(row["flight_id"]))]
 
 
 class PairingRepository:
@@ -119,6 +209,31 @@ class PairingRepository:
         return [pairing for row in self.connection.execute(
             "SELECT pairing_id FROM rosters_pairings ORDER BY pairing_id"
         ) if (pairing := self.get(row["pairing_id"])) is not None]
+
+    def list_by_aircraft(self, aircraft: str, *, date: str | None = None) -> list[Pairing]:
+        query = "SELECT pairing_id FROM rosters_pairings WHERE aircraft = ?"
+        args: list[str] = [aircraft]
+        if date is not None:
+            query += (
+                " AND EXISTS (SELECT 1 FROM rosters_pairings_days d "
+                "WHERE d.parent_id = rosters_pairings.id AND d.date = ?)"
+            )
+            args.append(date)
+        query += " ORDER BY pairing_id"
+        return [
+            pairing for row in self.connection.execute(query, args)
+            if (pairing := self.get(row["pairing_id"])) is not None
+        ]
+
+    def list_by_date(self, date: str) -> list[Pairing]:
+        return [
+            pairing for row in self.connection.execute(
+                "SELECT DISTINCT p.pairing_id FROM rosters_pairings p "
+                "JOIN rosters_pairings_days d ON d.parent_id = p.id WHERE d.date = ?",
+                (date,),
+            )
+            if (pairing := self.get(row["pairing_id"])) is not None
+        ]
 
 
 class RosterRepository:
@@ -186,6 +301,14 @@ class CertificationRepository:
         rows = self.connection.execute(
             "SELECT crew_id, cert_type, valid_from, valid_to FROM certifications "
             "WHERE crew_id = ? ORDER BY valid_to, cert_type", (crew_id,))
+        return [Certification(*row) for row in rows]
+
+    def list_expiring(self, *, from_date: str, to_date: str) -> list[Certification]:
+        rows = self.connection.execute(
+            "SELECT crew_id, cert_type, valid_from, valid_to FROM certifications "
+            "WHERE valid_to BETWEEN ? AND ? ORDER BY id",
+            (from_date, to_date),
+        )
         return [Certification(*row) for row in rows]
 
 
