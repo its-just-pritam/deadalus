@@ -8,6 +8,7 @@ from typing import Any
 DATA_DIR = Path("/data")
 DATABASE_PATH = Path("/var/lib/sqlite/crew_operations.db")
 CHAT_HISTORY_TABLE = "chat_history"
+TOOL_CALLS_TABLE = "tool_calls"
 
 
 def table_name(path: Path) -> str:
@@ -164,10 +165,20 @@ def insert_tables(connection: sqlite3.Connection, tables: dict[str, dict[str, An
             )
 
 
+def table_exists(connection: sqlite3.Connection, table: str) -> bool:
+    row = connection.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+        (table,),
+    ).fetchone()
+    return row is not None
+
+
 def create_chat_history_table(connection: sqlite3.Connection) -> None:
+    if table_exists(connection, CHAT_HISTORY_TABLE):
+        return
     connection.execute(
         """
-        CREATE TABLE IF NOT EXISTS chat_history (
+        CREATE TABLE chat_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             session_id TEXT NOT NULL,
             role TEXT NOT NULL,
@@ -175,6 +186,29 @@ def create_chat_history_table(connection: sqlite3.Connection) -> None:
             source_question TEXT,
             created_at TEXT NOT NULL,
             response_time_ms INTEGER
+        )
+        """
+    )
+
+
+def create_tool_calls_table(connection: sqlite3.Connection) -> None:
+    if table_exists(connection, TOOL_CALLS_TABLE):
+        return
+    connection.execute(
+        """
+        CREATE TABLE tool_calls (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            message_id INTEGER NOT NULL,
+            tool_name TEXT NOT NULL,
+            method TEXT NOT NULL,
+            request_url TEXT NOT NULL,
+            curl_command TEXT NOT NULL,
+            status_code INTEGER,
+            duration_ms REAL,
+            success INTEGER NOT NULL,
+            error_message TEXT,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (message_id) REFERENCES chat_history (id)
         )
         """
     )
@@ -192,7 +226,7 @@ def main() -> None:
             "SELECT name FROM sqlite_master WHERE type = 'table'"
         ).fetchall()
         for (table,) in existing_tables:
-            if table in {CHAT_HISTORY_TABLE, "sqlite_sequence"}:
+            if table in {CHAT_HISTORY_TABLE, TOOL_CALLS_TABLE, "sqlite_sequence"}:
                 continue
             connection.execute(f"DROP TABLE IF EXISTS {quote_identifier(table)}")
 
@@ -209,6 +243,7 @@ def main() -> None:
         create_tables(connection, tables)
         insert_tables(connection, tables)
         create_chat_history_table(connection)
+        create_tool_calls_table(connection)
         connection.execute("PRAGMA foreign_keys = ON")
         violations = connection.execute("PRAGMA foreign_key_check").fetchall()
         if violations:
