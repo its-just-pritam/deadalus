@@ -327,6 +327,7 @@ and are not available yet.
 - <span style="color: goldenrod">[planned]</span> `GET /api/flights/{flightId}/passenger-impact`
 - <span style="color: green">[implemented]</span> `GET /api/flights/affected?station=&from=&to=`
 - <span style="color: green">[implemented]</span> `GET /api/flights/{flightId}/cancellation-impact`
+- <span style="color: green">[implemented]</span> `GET /api/flights/most-seats`
 - <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/qualification?aircraftType=&date=`
 - <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/legality?pairingId=&date=`
 - <span style="color: green">[implemented]</span> `GET /api/pairings/{pairingId}/legality?crewId=&date=&delayHours=`
@@ -345,6 +346,7 @@ and are not available yet.
 - <span style="color: goldenrod">[planned]</span> `GET /api/recovery/candidates?pairingId=&crewRole=&date=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/recovery/options?pairingId=&crewId=&date=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/recovery/ranked-options?pairingId=&from=&to=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/recovery/joint-plan?aircrafts=&date=`
+- <span style="color: green">[implemented]</span> `GET /api/recovery/ranked-options?pairingId=&from=&to=`
+- <span style="color: green">[implemented]</span> `GET /api/recovery/joint-plan?aircrafts=&date=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/recovery/briefing?date=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/aircraft/{aircraft}/morning-briefing?date=`
