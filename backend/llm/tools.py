@@ -1,10 +1,13 @@
 """LangChain tools that retrieve facts through the public HTTP API."""
 
+import contextvars
 import json
 import logging
 import os
+import sqlite3
 import sys
 import time
+from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urlencode
 
@@ -22,6 +25,56 @@ if not logger.handlers:
 logger.propagate = False
 
 
+# Set by the chat controller so tool calls made while answering a question are
+# persisted against the originating chat_history row.
+_tool_call_context: contextvars.ContextVar[
+    tuple[sqlite3.Connection, int] | None
+] = contextvars.ContextVar("tool_call_context", default=None)
+
+
+def set_tool_call_logging(connection: sqlite3.Connection, message_id: int) -> None:
+    _tool_call_context.set((connection, message_id))
+
+
+def clear_tool_call_logging() -> None:
+    _tool_call_context.set(None)
+
+
+def _record_tool_call(
+    tool_name: str,
+    method: str,
+    request_url: str,
+    curl_command: str,
+    status_code: int | None,
+    duration_ms: float,
+    success: bool,
+    error_message: str | None,
+) -> None:
+    context = _tool_call_context.get()
+    if context is None:
+        return
+    connection, message_id = context
+    connection.execute(
+        "INSERT INTO tool_calls "
+        "(message_id, tool_name, method, request_url, curl_command, status_code, "
+        "duration_ms, success, error_message, created_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            message_id,
+            tool_name,
+            method,
+            request_url,
+            curl_command,
+            status_code,
+            duration_ms,
+            1 if success else 0,
+            error_message,
+            datetime.now(timezone.utc).isoformat(),
+        ),
+    )
+    connection.commit()
+
+
 def _api_base_url() -> str:
     return os.environ.get("CREW_OPERATIONS_API_URL", "http://127.0.0.1:8000").rstrip("/")
 
@@ -37,6 +90,7 @@ def _get_json(
     url = f"{_api_base_url()}{path}"
     query_string = urlencode(filtered_params)
     request_url = f"{url}?{query_string}" if query_string else url
+    curl_command = f'curl -sS -X GET "{request_url}"'
     started_at = time.perf_counter()
     logger.info(
         "[INVOKE_TOOL] tool=%s curl.exe -sS -X GET \"%s\"",
@@ -57,28 +111,47 @@ def _get_json(
         )
         response.raise_for_status()
     except httpx.HTTPStatusError as exc:
+        duration_ms = (time.perf_counter() - started_at) * 1000
         logger.warning(
             "retrieval_tool_failure tool=%s status=%s duration_ms=%.1f",
             tool_name,
             exc.response.status_code,
-            (time.perf_counter() - started_at) * 1000,
+            duration_ms,
+        )
+        _record_tool_call(
+            tool_name,
+            "GET",
+            request_url,
+            curl_command,
+            exc.response.status_code,
+            duration_ms,
+            False,
+            str(exc),
         )
         raise RuntimeError(
             f"Retrieval API returned {exc.response.status_code}: {exc.response.text}"
         ) from exc
     except httpx.HTTPError as exc:
+        duration_ms = (time.perf_counter() - started_at) * 1000
         logger.warning(
             "retrieval_tool_failure tool=%s error=%s duration_ms=%.1f",
             tool_name,
             type(exc).__name__,
-            (time.perf_counter() - started_at) * 1000,
+            duration_ms,
+        )
+        _record_tool_call(
+            tool_name, "GET", request_url, curl_command, None, duration_ms, False, str(exc)
         )
         raise RuntimeError(f"Retrieval API is unavailable: {exc}") from exc
+    duration_ms = (time.perf_counter() - started_at) * 1000
     logger.info(
         "retrieval_tool_success tool=%s status=%s duration_ms=%.1f",
         tool_name,
         response.status_code,
-        (time.perf_counter() - started_at) * 1000,
+        duration_ms,
+    )
+    _record_tool_call(
+        tool_name, "GET", request_url, curl_command, response.status_code, duration_ms, True, None
     )
     return json.dumps(response.json())
 

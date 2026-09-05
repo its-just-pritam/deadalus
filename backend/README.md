@@ -151,6 +151,11 @@ The LangChain agent is available through:
   for a session. Chat messages are stored in the `chat_history` table, which is
   created by the SQLite importer during Docker database boot and preserved when
   operational tables are re-imported.
+- `GET /api/chat/tool-calls?message_id=` - returns every retrieval tool call made
+  while answering the given chat message (the user question row's `message_id`
+  from the chat response), including the tool name, the request URL, an
+  equivalent `curl` command, status code, duration, and timestamp. Tool calls
+  are stored in the `tool_calls` table, created the same way as `chat_history`.
 
 The agent has retrieval tools backed by the HTTP API, including
 `get_duty_clock`, `get_duty_history`, `get_duty_headroom`, and `get_rule` for

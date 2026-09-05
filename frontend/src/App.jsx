@@ -44,17 +44,32 @@ export function App() {
     let active = true
     fetch(`/api/chat/history?session_id=${SESSION_ID}`)
       .then((response) => (response.ok ? response.json() : []))
-      .then((history) => {
-        if (active && history.length > 0) {
-          setMessages(history.map((message) => ({
-            id: message.message_id,
-            role: message.role,
-            content: message.content,
-            createdAt: message.created_at,
-            responseTimeMs: message.response_time_ms,
-            sourceQuestion: message.source_question,
-          })))
-        }
+      .then(async (history) => {
+        if (!active || history.length === 0) return
+        const mapped = history.map((message) => ({
+          id: message.message_id,
+          role: message.role,
+          content: message.content,
+          createdAt: message.created_at,
+          responseTimeMs: message.response_time_ms,
+          sourceQuestion: message.source_question,
+        }))
+        // Tool calls are logged against the user question's message_id, not the assistant reply's.
+        const withToolCalls = await Promise.all(
+          mapped.map(async (message, index) => {
+            if (message.role !== 'assistant') return message
+            const questionMessage = mapped[index - 1]
+            if (!questionMessage || questionMessage.role !== 'user') return message
+            try {
+              const response = await fetch(`/api/chat/tool-calls?message_id=${questionMessage.id}`)
+              if (!response.ok) return message
+              return { ...message, toolCalls: await response.json() }
+            } catch {
+              return message
+            }
+          })
+        )
+        if (active) setMessages(withToolCalls)
       })
       .catch(() => {})
 
@@ -88,12 +103,14 @@ export function App() {
         {
           id: payload.message_id,
           role: 'assistant',
-          content: payload.answer,
+          content: '',
           createdAt: payload.created_at,
-          responseTimeMs: payload.response_time_ms,
           sourceQuestion: trimmed,
+          pending: true,
+          toolCalls: [],
         },
       ])
+      pollForAnswer(payload.message_id, requestStartedAt)
     } catch (requestError) {
       const message = formatError(requestError)
       const responseTimeMs = Math.round(performance.now() - requestStartedAt)
@@ -109,8 +126,59 @@ export function App() {
           sourceQuestion: trimmed,
         },
       ])
-    } finally {
       setIsSending(false)
+    }
+  }
+
+  function finishWithError(messageId, message, requestStartedAt) {
+    const responseTimeMs = Math.round(performance.now() - requestStartedAt)
+    setError(message)
+    setMessages((current) => current.map((entry) => (
+      entry.id === messageId
+        ? { ...entry, content: `I could not complete that request. ${message}`, responseTimeMs, pending: false }
+        : entry
+    )))
+    setIsSending(false)
+  }
+
+  async function pollForAnswer(messageId, requestStartedAt) {
+    try {
+      const toolCallsResponse = await fetch(`/api/chat/tool-calls?message_id=${messageId}`)
+      if (toolCallsResponse.ok) {
+        const toolCalls = await toolCallsResponse.json()
+        setMessages((current) => current.map((entry) => (
+          entry.id === messageId ? { ...entry, toolCalls } : entry
+        )))
+      }
+
+      const statusResponse = await fetch(`/api/chat/status?message_id=${messageId}`)
+      const status = await statusResponse.json()
+      if (!statusResponse.ok) throw status
+
+      if (status.status === 'pending') {
+        window.setTimeout(() => pollForAnswer(messageId, requestStartedAt), 800)
+        return
+      }
+
+      if (status.status === 'done') {
+        setMessages((current) => current.map((entry) => (
+          entry.id === messageId
+            ? {
+                ...entry,
+                content: status.answer,
+                createdAt: status.created_at,
+                responseTimeMs: status.response_time_ms,
+                pending: false,
+              }
+            : entry
+        )))
+        setIsSending(false)
+        return
+      }
+
+      finishWithError(messageId, status.error || 'The operations service could not answer right now.', requestStartedAt)
+    } catch (pollError) {
+      finishWithError(messageId, formatError(pollError), requestStartedAt)
     }
   }
 
@@ -174,32 +242,51 @@ export function App() {
                   <div className="avatar" aria-hidden="true">
                     {message.role === 'assistant' ? <Bot size={17} /> : <UserRound size={17} />}
                   </div>
-                  <div className="message-bubble">
-                    <span className="message-label">{message.role === 'assistant' ? 'Operations desk' : 'You'}</span>
-                    <p>{message.content}</p>
-                    {message.role === 'assistant' && message.sourceQuestion && (
-                      <div className="response-meta">
-                        <span>{formatTimestamp(message.createdAt)}</span>
-                        <span>{formatResponseTime(message.responseTimeMs)}</span>
-                        <button className="response-action" onClick={() => copyResponse(message)} title="Copy response" aria-label="Copy response">
-                          {copiedId === message.id ? <Check size={13} /> : <Copy size={13} />}
-                        </button>
-                        {message.sourceQuestion && (
-                          <button className="response-action" onClick={() => retryResponse(message)} disabled={isSending} title="Retry response" aria-label="Retry response">
-                            <RefreshCw size={13} />
-                          </button>
+                  <div className="message-column">
+                    {(message.pending || (message.toolCalls && message.toolCalls.length > 0)) && (
+                      <div className="tool-call-panel">
+                        <span className="tool-call-panel-label">Retrieval tools</span>
+                        {message.toolCalls && message.toolCalls.length > 0 ? (
+                          <ul className="tool-call-list">
+                            {message.toolCalls.map((call) => (
+                              <li className={`tool-call-item ${call.success ? 'ok' : 'failed'}`} key={call.id}>
+                                <span className="tool-call-name">{call.tool_name}</span>
+                                <span className="tool-call-meta">
+                                  {call.method} {call.status_code ?? ''} · {call.duration_ms ? `${Math.round(call.duration_ms)} ms` : '...'}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="tool-call-empty">Selecting a retrieval tool...</p>
                         )}
                       </div>
                     )}
+                    <div className="message-bubble">
+                      <span className="message-label">{message.role === 'assistant' ? 'Operations desk' : 'You'}</span>
+                      {message.pending ? (
+                        <div className="typing"><span /><span /><span /></div>
+                      ) : (
+                        <p>{message.content}</p>
+                      )}
+                      {message.role === 'assistant' && !message.pending && message.sourceQuestion && (
+                        <div className="response-meta">
+                          <span>{formatTimestamp(message.createdAt)}</span>
+                          <span>{formatResponseTime(message.responseTimeMs)}</span>
+                          <button className="response-action" onClick={() => copyResponse(message)} title="Copy response" aria-label="Copy response">
+                            {copiedId === message.id ? <Check size={13} /> : <Copy size={13} />}
+                          </button>
+                          {message.sourceQuestion && (
+                            <button className="response-action" onClick={() => retryResponse(message)} disabled={isSending} title="Retry response" aria-label="Retry response">
+                              <RefreshCw size={13} />
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </article>
               ))}
-              {isSending && (
-                <article className="message-row assistant">
-                  <div className="avatar"><Bot size={17} /></div>
-                  <div className="message-bubble typing"><span /><span /><span /></div>
-                </article>
-              )}
             </div>
 
             {messages.length === 1 && (
