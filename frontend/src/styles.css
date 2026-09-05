@@ -57,6 +57,7 @@ button { cursor: pointer; }
 .message-row.user { flex-direction: row-reverse; }
 .message-column { display: flex; flex-direction: column; gap: 8px; max-width: min(720px, 82%); }
 .message-row.user .message-column { align-items: flex-end; }
+.message-row.assistant .message-column { max-width: 100%; flex: 1 1 auto; align-items: stretch; }
 .avatar { width: 34px; height: 34px; flex: 0 0 auto; display: grid; place-items: center; color: var(--green); border: 1px solid #aeb3b2; border-radius: 10px 10px 3px 10px; background: linear-gradient(145deg, #f4f6f4, #cdd2d0); box-shadow: inset 1px 1px 2px rgba(53,58,58,.16), inset -1px -1px 1px rgba(255,255,255,.85); }
 .user .avatar { color: var(--gold); border-color: #cbb88e; border-radius: 10px 10px 10px 3px; background: linear-gradient(145deg, #fffdf5, #dfd2b4); }
 .message-bubble { max-width: 100%; padding: 14px 17px 15px; border: 1px solid #c6c9c8; border-radius: 4px 15px 15px; background: linear-gradient(145deg, #ffffff, #e9ebea); box-shadow: inset 1px 1px 4px rgba(38,43,43,.12), inset -1px -1px 1px rgba(255,255,255,.85); }
