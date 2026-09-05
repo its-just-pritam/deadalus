@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ArrowUp, Bot, Check, CircleHelp, Clock3, Copy, RefreshCw, RotateCcw, Send, Sparkles, UserRound } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 const suggestions = [
   'Who is on reserve at BLR on 2026-09-15?',
@@ -266,6 +268,8 @@ export function App() {
                       <span className="message-label">{message.role === 'assistant' ? 'Operations desk' : 'You'}</span>
                       {message.pending ? (
                         <div className="typing"><span /><span /><span /></div>
+                      ) : message.role === 'assistant' ? (
+                        <div className="markdown-body"><ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown></div>
                       ) : (
                         <p>{message.content}</p>
                       )}
