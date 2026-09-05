@@ -251,6 +251,17 @@ class DownstreamRestInput(BaseModel):
     date: str
 
 
+class RecoveryInput(BaseModel):
+    pairing_id: str
+    from_date: str
+    to_date: str
+
+
+class JointPlanInput(BaseModel):
+    aircrafts: str = Field(description="Comma-separated aircraft registrations")
+    date: str
+
+
 def _list_reserves(base: str, date: str | None = None) -> str:
     return _get_json("list_reserves", "/api/reserves", {"base": base, "date": date})
 
@@ -501,6 +512,26 @@ def _check_downstream_rest(crew_id: str, pairing_id: str, date: str) -> str:
     )
 
 
+def _get_most_seats() -> str:
+    return _get_json("get_most_seats", "/api/flights/most-seats")
+
+
+def _get_ranked_recovery(pairing_id: str, from_date: str, to_date: str) -> str:
+    return _get_json(
+        "get_ranked_recovery",
+        "/api/recovery/ranked-options",
+        {"pairingId": pairing_id, "from": from_date, "to": to_date},
+    )
+
+
+def _get_joint_plan(aircrafts: str, date: str) -> str:
+    return _get_json(
+        "get_joint_plan",
+        "/api/recovery/joint-plan",
+        {"aircrafts": aircrafts, "date": date},
+    )
+
+
 def get_retrieval_tools() -> list[StructuredTool]:
     """Return the only tools the operational LLM may use for retrieval."""
     return [
@@ -727,7 +758,10 @@ def get_retrieval_tools() -> list[StructuredTool]:
         StructuredTool.from_function(
             func=_get_cancellation_impact,
             name="get_cancellation_impact",
-            description="Retrieve passengers and cancellation cost for a flight.",
+            description=(
+                "Retrieve passengers and cancellation cost for one specifically named "
+                "flight. Use only when the user identifies a particular flight to cancel."
+            ),
             args_schema=CancellationImpactInput,
         ),
         StructuredTool.from_function(
@@ -752,5 +786,26 @@ def get_retrieval_tools() -> list[StructuredTool]:
             name="check_downstream_rest",
             description="Check whether a proposed pairing leaves sufficient rest before later duties.",
             args_schema=DownstreamRestInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_most_seats,
+            name="get_most_seats",
+            description=(
+                "Retrieve the maximum seat capacity, aircraft types, and matching flight "
+                "numbers across the schedule. Use this single aggregate tool for questions "
+                "about which flight or aircraft type has the most seats at risk."
+            ),
+        ),
+        StructuredTool.from_function(
+            func=_get_ranked_recovery,
+            name="get_ranked_recovery",
+            description="Retrieve ranked legal recovery options for a pairing and date range.",
+            args_schema=RecoveryInput,
+        ),
+        StructuredTool.from_function(
+            func=_get_joint_plan,
+            name="get_joint_plan",
+            description="Retrieve a minimum-cost joint recovery plan for multiple aircraft.",
+            args_schema=JointPlanInput,
         ),
     ]

@@ -147,6 +147,10 @@ API exposes:
 The LangChain agent is available through:
 
 - `POST /api/chat` - accepts `{"question": "..."}` and returns an LLM answer.
+- `GET /api/chat/history?session_id=default` - returns the persisted chat messages
+  for a session. Chat messages are stored in the `chat_history` table, which is
+  created by the SQLite importer during Docker database boot and preserved when
+  operational tables are re-imported.
 
 The agent has retrieval tools backed by the HTTP API, including
 `get_duty_clock`, `get_duty_history`, `get_duty_headroom`, and `get_rule` for
@@ -163,7 +167,7 @@ Each retrieval call logs the tool name, HTTP path, query parameters, status, and
 duration. Response bodies and API keys are not logged. View these logs with:
 
 ```bash
-docker compose logs -f api
+docker compose logs -f backend
 ```
 
 Configure the required `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` values.
@@ -183,7 +187,7 @@ curl -X POST http://localhost:8000/api/chat \
 To run the API in Docker, start the importer and API service:
 
 ```bash
-docker compose up --build api
+docker compose up --build backend
 ```
 
 The API is available at `http://localhost:8000`, with interactive
@@ -327,6 +331,7 @@ and are not available yet.
 - <span style="color: goldenrod">[planned]</span> `GET /api/flights/{flightId}/passenger-impact`
 - <span style="color: green">[implemented]</span> `GET /api/flights/affected?station=&from=&to=`
 - <span style="color: green">[implemented]</span> `GET /api/flights/{flightId}/cancellation-impact`
+- <span style="color: green">[implemented]</span> `GET /api/flights/most-seats`
 - <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/qualification?aircraftType=&date=`
 - <span style="color: green">[implemented]</span> `GET /api/crew/{crewId}/legality?pairingId=&date=`
 - <span style="color: green">[implemented]</span> `GET /api/pairings/{pairingId}/legality?crewId=&date=&delayHours=`
@@ -345,6 +350,7 @@ and are not available yet.
 - <span style="color: goldenrod">[planned]</span> `GET /api/recovery/candidates?pairingId=&crewRole=&date=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/recovery/options?pairingId=&crewId=&date=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/recovery/ranked-options?pairingId=&from=&to=`
-- <span style="color: goldenrod">[planned]</span> `GET /api/recovery/joint-plan?aircrafts=&date=`
+- <span style="color: green">[implemented]</span> `GET /api/recovery/ranked-options?pairingId=&from=&to=`
+- <span style="color: green">[implemented]</span> `GET /api/recovery/joint-plan?aircrafts=&date=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/recovery/briefing?date=`
 - <span style="color: goldenrod">[planned]</span> `GET /api/aircraft/{aircraft}/morning-briefing?date=`

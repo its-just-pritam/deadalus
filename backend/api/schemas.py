@@ -210,3 +210,30 @@ class DownstreamRestResponse(BaseModel):
     pairing_id: str
     legal: bool
     issues: list[str]
+
+
+class SeatRiskResponse(BaseModel):
+    seats: int
+    aircraft_types: list[str]
+    flights: list[str]
+
+
+class RecoveryOptionResponse(BaseModel):
+    action: str
+    crew_id: str | None
+    legal: bool
+    cost_inr: int | None
+    delay_hours: float | None
+    rank: int | None
+    reasoning: str
+
+
+class RankedRecoveryResponse(BaseModel):
+    pairing_id: str
+    options: list[RecoveryOptionResponse]
+
+
+class JointPlanResponse(BaseModel):
+    date: str
+    total_cost_inr: int
+    assignments: dict[str, RecoveryOptionResponse]
