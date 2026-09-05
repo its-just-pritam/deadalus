@@ -22,7 +22,7 @@ services:
     volumes:
       - sqlite_data:/var/lib/sqlite
 
-  api:
+  backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
@@ -31,9 +31,9 @@ services:
         condition: service_completed_successfully
     environment:
       CREW_OPERATIONS_DB: /var/lib/sqlite/crew_operations.db
-      OPENROUTER_API_KEY: 
+      OPENROUTER_API_KEY: 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
       OPENROUTER_MODEL: z-ai/glm-5.3-flash
-      CREW_OPERATIONS_API_URL: http://127.0.0.1:8000
+      CREW_OPERATIONS_API_URL: http://backend:8000
     ports:
       - "8000:8000"
     volumes:
@@ -44,9 +44,9 @@ services:
     working_dir: /app
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     depends_on:
-      - api
+      - backend
     environment:
-      VITE_API_PROXY_TARGET: http://api:8000
+      VITE_API_PROXY_TARGET: http://backend:8000
     ports:
       - "5173:5173"
     volumes:

@@ -163,7 +163,7 @@ Each retrieval call logs the tool name, HTTP path, query parameters, status, and
 duration. Response bodies and API keys are not logged. View these logs with:
 
 ```bash
-docker compose logs -f api
+docker compose logs -f backend
 ```
 
 Configure the required `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` values.
@@ -183,7 +183,7 @@ curl -X POST http://localhost:8000/api/chat \
 To run the API in Docker, start the importer and API service:
 
 ```bash
-docker compose up --build api
+docker compose up --build backend
 ```
 
 The API is available at `http://localhost:8000`, with interactive
