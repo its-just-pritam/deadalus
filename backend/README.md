@@ -9,6 +9,7 @@ Initial modular-monolith structure created. A Docker Compose importer now loads 
 ## Architecture
 
 The backend keeps operational authority in deterministic domain services. The LLM is responsible for natural-language understanding, tool selection, and explanation of verified results. It must not calculate aviation legality or invent crew assignments.
+<img width="713" height="284" alt="image" src="https://github.com/user-attachments/assets/e30a11ad-98bd-469c-87fc-b6f5f4ca20ad" />
 
 ```text
 API / Conversational Controller
