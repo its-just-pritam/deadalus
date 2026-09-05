@@ -1,0 +1,268 @@
+[
+  {
+    "question_id": "Q01",
+    "tier": 1,
+    "prompt": "Who is on reserve at BLR on 2026-09-15, and what are their on-call windows?",
+    "response": "Here are the crew on reserve at BLR on **2026-09-15**, with their UTC on-call windows:\n\n**Captains**\n| Crew ID | On-call window (UTC) |\n|---|---|\n| C-3305 | 00:00 \u2013 05:30 |\n| C-3315 | 03:00 \u2013 15:00 |\n| C-3310 | 06:00 \u2013 18:00 |\n\n**First Officers**\n| Crew ID | On-call window (UTC) |\n|---|---|\n| C-3312 | 00:00 \u2013 12:00 |\n| C-3316 | 03:00 \u2013 15:00 |\n| C-3311 | 06:00 \u2013 18:00 |\n\n**Cabin Crew**\n| Crew ID | Rank | On-call window (UTC) |\n|---|---|---|\n| C-1329 | Cabin Crew | 04:00 \u2013 16:00 |\n| C-2248 | Cabin Crew | 04:00 \u2013 16:00 |\n| C-5418 | Cabin Crew | 04:00 \u2013 16:00 |\n| C-2111 | Senior Cabin Crew | 04:00 \u2013 16:00 |\n| C-3677 | Senior Cabin Crew | 04:00 \u2013 16:00 |\n| C-4809 | Cabin Crew | 00:00 \u2013 12:00 |\n\n**Notes:**\n- All 12 reserves list 2026-09-15 among their active reserve dates (their roster spans 2026-09-14 through 2026-09-20).\n- The on-call window constrains the **callout time** \u2014 a callout must fall inside the window per RULE-BASE-07 (base rule). It does not directly define report time; reachability determines whether a callout can support a required report time.\n- Early-morning coverage (00:00) is limited to C-3305 (Captain, until 05:30), C-3312 (FO, until 12:00), and C-4809 (Cabin Crew, until 12:00).\n\nIf you have a specific duty report time and rank/aircraft type in mind, I can run a reserve-availability match against these windows.",
+    "passed": true
+  },
+  {
+    "question_id": "Q02",
+    "tier": 1,
+    "prompt": "As of the snapshot, how many duty hours has C-1042 accrued in the 7 calendar days ending 2026-09-14, and how much headroom does that leave under RULE-DUTY-02?",
+    "response": "**C-1042 has accrued 20.93 duty hours in the 7 calendar days ending 2026-09-14, leaving 39.07 hours of headroom under RULE-DUTY-02.**\n\nDetails (authoritative snapshot as of 2026-09-14T18:00:00Z):\n\n- **7-day duty hours:** 20.93 h. This is confirmed by the daily history for the window 2026-09-08 \u2192 2026-09-14: 9.99 h on Sep 9 + 10.94 h on Sep 12, with zero duty on the other five days.\n- **RULE-DUTY-02 limit:** Max 60 duty hours in any 7 consecutive calendar days (inclusive of duty date).\n- **Headroom:** 60.00 \u2212 20.93 = **39.07 h** remaining before the rule cap is reached, so the crew member is well within limits \u2014 roughly one-third of the 7-day budget consumed.",
+    "passed": true
+  },
+  {
+    "question_id": "Q03",
+    "tier": 1,
+    "prompt": "Which flights depart DEL on 2026-09-15?",
+    "response": "On 2026-09-15, one flight departs DEL:\n\n**DX402 \u2014 DEL \u2192 BLR**\n- Departure: 2026-09-15 06:00 UTC\n- Arrival: 2026-09-15 08:45 UTC\n- Block time: 2.75 hours\n- Aircraft: VT-DXA (A320, 162 seats)\n\nThis comes from the departures list for DEL on that UTC date. Let me know if you'd like crew, pairing, or cancellation details for DX402.",
+    "passed": true
+  },
+  {
+    "question_id": "Q04",
+    "tier": 1,
+    "prompt": "List all certifications expiring within 30 days of 2026-09-15.",
+    "response": "Here are all certifications expiring within 30 days of 2026-09-15 (window: 2026-09-15 through 2026-10-15, inclusive):\n\n| Crew ID | Certification Type | Valid To |\n|---------|-------------------|----------|\n| C-5417 | Recurrent Training | 2026-09-17 |\n| C-2087 | Licence | 2026-09-18 |\n| C-2091 | Medical Class 1 | 2026-09-23 |\n| C-3116 | Dangerous Goods | 2026-09-28 |\n| C-5020 | Recurrent Training | 2026-10-03 |\n| C-2993 | Medical Class 1 | 2026-10-08 |\n\n**Summary:** 6 certifications across 6 crew members expire in this window \u2014 2 recurrent training, 2 medical class 1, 1 licence, and 1 dangerous goods. The most urgent is C-5417's recurrent training, expiring on 2026-09-17 (just 2 days after the window start).\n\nThis list comes directly from the authoritative certification registry, which returns all certifications whose `valid_to` date falls within the inclusive UTC date range queried.",
+    "passed": true
+  },
+  {
+    "question_id": "Q05",
+    "tier": 1,
+    "prompt": "Which aircraft operates DX412 on 2026-09-15, and how many seats does it have?",
+    "response": null,
+    "passed": false
+  },
+  {
+    "question_id": "Q06",
+    "tier": 1,
+    "prompt": "What is C-3310's reserve on-call window and reachability?",
+    "response": "**C-3310 (D. Reddy, Captain, base BLR)** is an active reserve with:\n\n- **On-call window (UTC): 06:00 \u2013 18:00** \u2014 any callout must fall within this window (RULE-BASE-07 applies for the base).\n- **Reachability: 45 minutes** \u2014 the crew member can support a callout and be ready for report within 45 minutes.\n- **Reserve dates:** 2026-09-14 through 2026-09-20, rated A320.\n\nNote the distinction: the window constrains *when you can call* (callout time), while the 45-minute reachability determines the *feasibility of meeting a required report time* \u2014 so a callout just before 18:00 could still support a report up to about 18:45 UTC.",
+    "passed": true
+  },
+  {
+    "question_id": "Q07",
+    "tier": 1,
+    "prompt": "What is C-2210's base and rating?",
+    "response": "**C-2210 (S. Kapoor, Captain):**\n- **Base:** DEL\n- **Rating:** A320\n\nThis comes from the crew profile, which also shows an active status, seniority rank 2, and a reachability of 60 minutes \u2014 the A320 rating is confirmed by the authoritative ratings record.",
+    "passed": true
+  },
+  {
+    "question_id": "Q08",
+    "tier": 1,
+    "prompt": "Which crew are assigned to pairing P-2291, and in what roles?",
+    "response": "Pairing **P-2291** has six crew members assigned in the following roles:\n\n| Crew ID | Role |\n|---------|------|\n| C-1042 | Captain |\n| C-1694 | First Officer |\n| C-3005 | Senior Cabin Crew |\n| C-4395 | Cabin Crew |\n| C-4273 | Cabin Crew |\n| C-1873 | Cabin Crew |\n\nThis is the authoritative crew/role assignment from the pairing record \u2014 a flight deck complement of Captain and First Officer plus a cabin team of four (one senior, three cabin crew). Let me know if you'd like crew profiles, duty legality, or reserve coverage details for any of these members.",
+    "passed": true
+  },
+  {
+    "question_id": "Q09",
+    "tier": 1,
+    "prompt": "Which flights fly BLR\u2192BOM on 2026-09-17?",
+    "response": "On 2026-09-17, there are **two flights** operating BLR\u2192BOM:\n\n| Flight | Departure (UTC) | Arrival (UTC) | Block Time | Aircraft | Seats |\n|--------|-----------------|---------------|------------|----------|-------|\n| **DX431** | 03:30 | 05:15 | 1h 45m | VT-DXD (A320) | 162 |\n| **DX412** | 07:00 | 08:45 | 1h 45m | VT-DXC (A320) | 162 |\n\nBoth are A320 services with a 1h45m block time \u2014 DX431 in the early morning and DX412 mid-morning.",
+    "passed": true
+  },
+  {
+    "question_id": "Q10",
+    "tier": 1,
+    "prompt": "How many flights operate on 2026-09-16 in total?",
+    "response": "**21 flights** operate on 2026-09-16 in total, per the authoritative flight count for that UTC date.",
+    "passed": true
+  },
+  {
+    "question_id": "Q11",
+    "tier": 1,
+    "prompt": "How many captains are based at DEL, and who are they?",
+    "response": "There is **1 captain** based at DEL:\n\n| Crew ID | Name | Rank | Base | Status | Seniority | Ratings | Reachability |\n|---------|------|------|------|--------|-----------|---------|--------------|\n| C-2210 | S. Kapoor | Captain | DEL | Active | 2 | A320 | 60 minutes |\n\n**Details:** S. Kapoor is the only captain assigned to the DEL base per the crew profile search. He is an active crew member holding an A320 rating, with a reachability time of 60 minutes for callout purposes.",
+    "passed": true
+  },
+  {
+    "question_id": "Q12",
+    "tier": 1,
+    "prompt": "What is the longest block time in the schedule, and which flights have it?",
+    "response": "The longest block time in the schedule is **2.75 hours**, and it is held by four flights: **DX401, DX402, DX588, and DX589**.\n\nThis comes from the schedule-wide longest-block lookup, which returns the maximum block time and every flight number currently tied to it.",
+    "passed": true
+  },
+  {
+    "question_id": "Q13",
+    "tier": 1,
+    "prompt": "What is C-2087's rank, and total flight hours over the 28 days ending 2026-09-14?",
+    "response": "**C-2087 (R. Iyer)** \u2014 Rank: **Captain** (base BLR, active, A320-rated).\n\n**28-day flight hours ending 2026-09-14:** **23.5 hours** (authoritative snapshot as of 2026-09-14T18:00:00Z).\n\nThis is corroborated by the daily history: the only flight activity in the window was 7.7 h (Sep 9) + 7.4 h (Sep 10) + 8.4 h (Sep 12) = 23.5 h.",
+    "passed": true
+  },
+  {
+    "question_id": "Q14",
+    "tier": 1,
+    "prompt": "Which stations does the network serve nonstop from BLR?",
+    "response": "BLR serves **7 nonstop destinations** on the network:\n\n| Station | City |\n|---------|------|\n| BOM | Mumbai |\n| CCU | Kolkata |\n| COK | Kochi |\n| DEL | Delhi |\n| GOI | Goa |\n| HYD | Hyderabad |\n| MAA | Chennai |\n\nThis comes directly from the station destinations lookup for BLR, which lists all stations reachable nonstop from Bengaluru.",
+    "passed": true
+  },
+  {
+    "question_id": "Q15",
+    "tier": 1,
+    "prompt": "Who is the Senior Cabin Crew on VT-DXB's pairing on 2026-09-16?",
+    "response": "**P. Chandra (C-3171)** is the Senior Cabin Crew on VT-DXB's pairing (P-2210) on 2026-09-16.\n\nDetails:\n- **Rank:** Senior Cabin Crew\n- **Base:** BLR\n- **Status:** Active\n- **Rating:** A320\n- **Reachability:** 60 minutes\n- **Seniority:** 15\n\nThe pairing P-2210 covers four flights on 2026-09-16 (DX421, DX422, DX423, DX424), reporting at 02:00Z and releasing at 13:15Z.",
+    "passed": true
+  },
+  {
+    "question_id": "Q16",
+    "tier": 1,
+    "prompt": "What is the disruption-risk score for C-1042 and what drives it?",
+    "response": "The disruption-risk score for **C-1042 is 0.78** (as of the 2026-09-14T18:00:00Z snapshot).\n\n**What's driving it:**\n1. **Short-rest pattern over the last 14 days** \u2014 repeated insufficient rest periods are accumulating risk.\n2. **Two fatigue reports this month** \u2014 active fatigue indicators elevating the score.\n\nThis is a high score (on a 0\u20131 scale), so C-1042 would be a strong candidate for rest-priority roster adjustments before assigning additional pairings.",
+    "passed": true
+  },
+  {
+    "question_id": "Q17",
+    "tier": 2,
+    "prompt": "Captain C-1042 calls in sick at 05:00Z on 15 Sep for pairing P-2291. Which flights are immediately uncrewed?",
+    "response": "Captain C-1042's absence from pairing P-2291 on 15 Sep immediately leaves **three flights uncrewed**:\n\n| Flight | Date |\n|--------|------|\n| DX412 | 2026-09-15 |\n| DX413 | 2026-09-15 |\n| DX588 | 2026-09-15 |\n\n**Additional context:**\n- **486 passengers** are affected on day 1 of the pairing.\n- Three further flights on **16 Sep (DX589, DX590, DX591)** are also at risk, since they belong to day 2 of the same pairing \u2014 they aren't immediately uncrewed, but they will be unless a replacement captain is secured for the full pairing.\n\n**Recommended next step:** Since the sickness call came at 05:00Z, I can check which reserves at the relevant base have an on-call window covering the required report time and hold the needed aircraft rating \u2014 just let me know the base and aircraft type, or I can pull the pairing details to determine them.",
+    "passed": true
+  },
+  {
+    "question_id": "Q18",
+    "tier": 2,
+    "prompt": "If Captain C-2087 is assigned to cover P-2291 from 15 Sep, does any rule breach? Give the detail.",
+    "response": "**Yes \u2014 assigning Captain C-2087 to P-2291 from 15 Sep would breach RULE-DUTY-02.**\n\n**Detail:**\n\n| Check | Result |\n|---|---|\n| Qualification (A320, VT-DXC) | \u2705 Valid on both 15 and 16 Sep \u2014 C-2087 holds an A320 rating, no certification issues |\n| Duty legality | \u274c **Not legal** \u2014 RULE-DUTY-02 breach on both duty days |\n\n**The breach (RULE-DUTY-02 \u2014 60-hour maximum duty in any 7-day period):**\n- **15 Sep 2026** (report 06:00Z, release 15:30Z, flights DX412/DX413/DX588): planned duty would take the 7-day total to **61.33h \u2014 exceeding the 60h limit by 1h20m**.\n- **16 Sep 2026** (report 04:00Z, release 14:45Z, flights DX589/DX590/DX591): the 7-day total would be **61.08h \u2014 exceeding the limit by 1h05m**.\n\n**Explanation:** C-2087's existing 7-day duty accumulation is already close to the 60-hour cap, so adding P-2291's two duty days pushes him over the limit on both days. His aircraft qualification is not the problem \u2014 the binding constraint is the 7-day duty-hour ceiling under RULE-DUTY-02. This assignment should not be made as proposed; a reserve or another captain with sufficient 7-day headroom would be needed instead.",
+    "passed": true
+  },
+  {
+    "question_id": "Q19",
+    "tier": 2,
+    "prompt": "BLR is closed 08:00\u201314:00Z on 17 Sep. Which flights are affected?",
+    "response": "The BLR closure (08:00\u201314:00Z on 17 Sep) affects **13 flights** \u2014 8 arrivals and 5 departures:\n\n**Arrivals into BLR during the closure (8):**\n\n| Flight | Route | Arrival (UTC) |\n|--------|-------|---------------|\n| DX402 | DEL \u2192 BLR | 08:45 |\n| DX422 | CCU \u2192 BLR | 08:45 |\n| DX462 | HYD \u2192 BLR | 08:45 |\n| DX454 | MAA \u2192 BLR | 10:45 |\n| DX413 | BOM \u2192 BLR | 11:15 |\n| DX434 | GOI \u2192 BLR | 11:45 |\n| DX404 | MAA \u2192 BLR | 12:15 |\n| DX424 | HYD \u2192 BLR | 12:45 |\n\n**Departures from BLR during the closure (5):**\n\n| Flight | Route | Departure (UTC) |\n|--------|-------|-----------------|\n| DX453 | BLR \u2192 MAA | 08:00 |\n| DX433 | BLR \u2192 GOI | 08:30 |\n| DX403 | BLR \u2192 MAA | 09:30 |\n| DX423 | BLR \u2192 HYD | 09:30 |\n| DX588 | BLR \u2192 DEL | 12:15 |\n\nNote that DX402, DX422, and DX462 depart their origin stations before the closure begins but arrive at BLR after 08:00Z, so they're impacted on the arrival side. If you'd like, I can check recovery options or cancellation impact for any of these flights.",
+    "passed": true
+  },
+  {
+    "question_id": "Q20",
+    "tier": 2,
+    "prompt": "VT-DXA is delayed 90 minutes before DX401 on 16 Sep. Does the rostered crew breach any limit if they fly all four legs?",
+    "response": "**Yes \u2014 flying all four legs would breach the FDP limit.**\n\n**What I found:**\n- VT-DXA is rostered on pairing **P-2203** for 16 Sep: report **01:30Z**, planned release **12:45Z**, covering **DX401/402/403/404** (4 sectors) with crew C-3187 (Captain), C-5375 (FO), and 4 cabin crew.\n\n**Per-crew legality:** Each of the 6 crew members passes the pairing legality check with the 1.5-hour delay applied \u2014 no issues on duty-hour or qualification grounds.\n\n**However, the FDP check (RULE-FDP-01) shows a breach:**\n- **Rule:** Max FDP 13h, reduced 0.5h per sector beyond the 2nd \u2192 4 sectors = 13.0 \u2212 2\u00d70.5 = **12.0h limit**\n- **FDP after 90-min delay:** **12.75h** (base FDP 11.25h + 1.5h delay)\n- **Result:** 12.75h > 12.0h limit \u2192 **breach by 0.75h**\n\n**Conclusion:** All six rostered crew share the same single duty day, so the FDP overrun applies to the entire crew. Even though their broader pairing legality checks pass, they cannot legally operate all four legs on this pairing with the 90-minute delay under RULE-FDP-01. You'd need a recovery option \u2014 e.g., splitting the duty, re-timing, or using reserve/replacement crew \u2014 before departure.",
+    "passed": true
+  },
+  {
+    "question_id": "Q21",
+    "tier": 2,
+    "prompt": "Can C-2210 (DEL base) legally cover P-2291 if positioned to BLR on the morning of 15 Sep? What is the operational consequence?",
+    "response": "## Answer: Yes \u2014 C-2210 can legally cover P-2291, but with a material operational cost\n\n**Legality \u2014 confirmed on all fronts:**\n- **Pairing legality**: `check_pairing_legality` returns **legal = true, no issues** for C-2210 on P-2291 from 2026-09-15.\n- **Qualification**: S. Kapoor holds an **A320 rating** with no certification issues on 15 Sep \u2014 a match for the pairing aircraft VT-DXC (A320).\n- **Downstream rest**: **Legal, no issues** \u2014 the pairing does not compromise later duties.\n- **FDP with positioning delay**: With the ~3.0 h delay applied, FDP after delay is **12.5 h against a 12.5 h limit \u2014 no breach, but at the limit with zero margin** (RULE-FDP-01).\n\n**The positioning constraint:**\nP-2291 reports in BLR at **06:00Z on 15 Sep**, but C-2210 is DEL-based. The only DEL\u2192BLR movement that morning is **DX402 (dep 06:00Z, arr 08:45Z)** \u2014 so Kapoor cannot be in BLR at the original report time. The earliest feasible arrival is 08:45Z, which is exactly the ~3.0 h delay baked into the FDP check above. Positioning cost under **RULE-BASE-07 (deadhead)** applies.\n\n**Operational consequence if the incumbent Captain (C-1042) is absent:**\n- **Day 1 (15 Sep):** DX412, DX413, DX588 at risk \u2014 **486 passengers**.\n- **Day 2 (16 Sep):** DX589, DX590, DX591 are *also* at risk, since the same crew continues the pairing.\n\n**Bottom line:** C-2210 is a legal, qualified substitute via deadhead DX402, rescuing all six flights, but the trade-off is a ~3-hour delay to the first BLR departure, FDP consumed to its exact 12.5-hour limit (no tolerance for any further slip), and the RULE-BASE-07 deadhead cost.",
+    "passed": true
+  },
+  {
+    "question_id": "Q22",
+    "tier": 2,
+    "prompt": "Can C-5417 legally operate their rostered VT-DXB duty on 19 Sep?",
+    "response": "**No \u2014 C-5417 cannot legally operate the VT-DXB duty on 19 Sep.**\n\n**Rostered duty:** Pairing P-2213 on VT-DXB, 19 Sep 2026 (report 02:00Z, release 13:15Z, flights DX421\u2013DX424), with C-5417 assigned as Cabin Crew.\n\n**Findings:**\n- **Duty legality: PASS** \u2014 `check_pairing_legality` returned legal with no issues (duty hours/rest are fine).\n- **Qualification: FAIL** \u2014 Although C-5417 holds an A320 rating, their **recurrent training certification expired on 17 Sep 2026**, two days before the duty date. Under **RULE-CERT-06** (\"All certifications must be valid on the duty date\"), this makes them unqualified to operate on 19 Sep.\n\n**Bottom line:** The duty itself is legal from a duty-time perspective, but the expired recurrent training blocks operation. C-5417 would need to complete recurrent training before 19 Sep, or a replacement Cabin Crew member would need to be assigned to P-2213.",
+    "passed": true
+  },
+  {
+    "question_id": "Q23",
+    "tier": 2,
+    "prompt": "A crew is released at 15:30Z on 16 Sep. What is the earliest they may report next?",
+    "response": "**Earliest next report: 03:30Z on 17 Sep 2026.**\n\nPer RULE-REST-04, the minimum rest period is **12 hours**. Adding 12 hours to the 15:30Z release on 16 Sep gives 03:30Z the following day, so the crew cannot report for duty any earlier than that.",
+    "passed": true
+  },
+  {
+    "question_id": "Q24",
+    "tier": 2,
+    "prompt": "Can reserve C-3305 cover the FULL pairing P-2291 (both days)? Why or why not?",
+    "response": "## Answer: **No** \u2014 reserve C-3305 cannot cover the full pairing P-2291.\n\n### Retrieved facts\n\n**Reserve C-3305 (V. Menon, Captain, BLR):**\n- Status: active, dates cover both pairing days\n- On-call window: **00:00\u201305:30 UTC** on both days; reachability 45 min\n- Rating: A320\n\n**Pairing P-2291 (VT-DXC):**\n- Day 1 (2026-09-15): report **06:00 UTC** \u2192 release 15:30 UTC (DX412/DX413/DX588)\n- Day 2 (2026-09-16): report **04:00 UTC** \u2192 release 14:45 UTC (DX589/DX590/DX591)\n\n### Checks performed\n\n| Check | Result | Detail |\n|---|---|---|\n| Qualification (A320) | \u2705 Pass | Rated and certified, no issues |\n| On-call window vs. report times | \u2705 Feasible | Day 1: callout ~05:15 UTC (inside 00:00\u201305:30); Day 2: callout ~03:15 UTC (inside window) \u2014 both supported by 45-min reachability |\n| Pairing legality | \u274c **Fail** | **RULE-DUTY-02: would exceed the 60h/7-day duty limit by 8h15m on 2026-09-16 (total 68.25h)** |\n| Downstream rest | \u2705 Pass | No rest violations |\n\n### Why not\n\nThe single blocker is the **7-day duty clock (RULE-DUTY-02)**. Covering both duty days would push C-3305 to **68.25 hours across 7 days \u2014 8h15m over the 60-hour limit**, with the breach occurring on Day 2 (2026-09-16). Everything else checks out: he's A320-qualified, and his 00:00\u201305:30 on-call window (with 45-minute reachability) can support both report times (06:00 and 04:00 UTC).\n\n**Implication:** C-3305 could legally cover **Day 1 only**, but the full two-day pairing is not legal for him. A different reserve with more duty-clock headroom (or splitting the pairing between two reserves) would be needed.",
+    "passed": true
+  },
+  {
+    "question_id": "Q25",
+    "tier": 2,
+    "prompt": "If DX404 on 16 Sep is cancelled, how many passengers are affected and what is the direct cancellation cost?",
+    "response": "If DX404 on 16 September is cancelled:\n\n- **Passengers affected:** 162\n- **Direct cancellation cost:** \u20b9250,000\n\nThis comes from the cancellation-impact record for DX404-2026-09-16, which is the authoritative source for that flight's passenger load and direct cancellation cost.",
+    "passed": true
+  },
+  {
+    "question_id": "Q26",
+    "tier": 2,
+    "prompt": "Which crew have 45 or more duty hours in the 7 days ending 2026-09-15 (including any planned duty that day)?",
+    "response": "Two crew members have 45 or more duty hours in the 7-day window ending 2026-09-15 (including any planned duty that day), per the at-risk duty query:\n\n| Crew | 7-Day Duty Hours (incl. planned) |\n|------|----------------------------------|\n| C-2087 | 51.83 hours |\n| C-3305 | 50.00 hours |\n\nBoth exceed the 45-hour threshold \u2014 C-2087 has roughly 51 hours 50 minutes, and C-3305 is right at 50 hours. These figures come from the authoritative at-risk crew calculation, which counts the 7-day rolling window through 2026-09-15 and includes planned duty on that day.",
+    "passed": true
+  },
+  {
+    "question_id": "Q27",
+    "tier": 2,
+    "prompt": "The VT-DXE captain is sick on 16 Sep (called 01:30Z). Which reserve captains' on-call windows cover the callout, and are they qualified?",
+    "response": "Here's the complete picture for the VT-DXE captain sickness on 16 Sep:\n\n## Situation\n- **Sick captain:** C-3231 (L. Verma), assigned to pairing **P-2224** on VT-DXE, report **03:00Z**, release 11:15Z, base **BLR**, aircraft type **ATR72** (flights DX451\u2013DX454).\n- The 01:30Z sickness call is the event context; reserve matching is done against the required **03:00Z report time**.\n\n## Reserve captain match\n**C-3315 is the only eligible reserve captain** \u2014 and is qualified:\n- **On-call window:** 03:00\u201315:00 UTC, which covers the required 03:00Z duty report per the reserve availability match.\n- **Qualification:** `check_qualification` returns **qualified = true** for ATR72 on 16 Sep, with an active ATR72 rating and **no certification issues**.\n\n## Why the other BLR reserve captains were excluded\n| Reserve | Reason excluded |\n|---|---|\n| C-3305 | **RULE-QUAL-05** \u2014 no ATR72 rating (qualification fails regardless of window) |\n| C-3310 | On-call window **06:00\u201318:00Z** does not cover the 03:00Z report |\n\n## Bottom line\nCall **C-3315** as the replacement captain for P-2224: their window covers the report time, they hold a valid ATR72 rating, and there are no certification issues on 16 Sep. Note that their window opens exactly at the 03:00Z report, so callout must happen promptly \u2014 I have not separately verified duty legality (7-day duty hours / rest) for C-3315 on this pairing, so a legality check is advisable before final assignment.",
+    "passed": true
+  },
+  {
+    "question_id": "Q28",
+    "tier": 2,
+    "prompt": "Captain C-5837 (VT-DXA line, works 14/17/20 Sep) is proposed to cover P-2291. Legal?",
+    "response": null,
+    "passed": false
+  },
+  {
+    "question_id": "Q29",
+    "tier": 2,
+    "prompt": "Station HYD is closed 05:00\u201309:00Z on 19 Sep. Which flights are affected?",
+    "response": "Two flights are affected by the HYD closure (05:00\u201309:00Z on 19 Sep):\n\n| Flight | Route | Departs (UTC) | Arrives (UTC) | Impact |\n|--------|-------|---------------|---------------|--------|\n| **DX461** | BLR \u2192 HYD | 05:00Z | 06:30Z | Arrives into HYD during the closure |\n| **DX462** | HYD \u2192 BLR | 07:15Z | 08:45Z | Departs from HYD during the closure |\n\n**Summary:** DX461 lands at HYD while the station is closed, and DX462 is scheduled to depart HYD within the closure window. Both would need schedule adjustments (delay, reroute, or cancellation) to operate around the 05:00\u201309:00Z closure.",
+    "passed": true
+  },
+  {
+    "question_id": "Q30",
+    "tier": 2,
+    "prompt": "Which single flight leg has the most seats at risk if cancelled, and why?",
+    "response": "**Answer: No single leg stands alone \u2014 18 flight legs are tied for the most seats at risk, each with 162 seats.**\n\nPer the schedule-wide seat aggregate:\n\n- **Maximum seats at risk on a single leg: 162**\n- **Aircraft type: A320** \u2014 the highest-capacity type in the schedule\n- **Tied legs:** DX401, DX402, DX403, DX404, DX412, DX413, DX421, DX422, DX423, DX424, DX431, DX432, DX433, DX434, DX588, DX589, DX590, DX591\n\n**Why:** Every one of these legs is operated by an A320, whose 162-seat capacity is the largest in the fleet. Since cancellation exposure on a leg is driven by the seats booked on that aircraft, all A320-operated legs carry the same maximum exposure of 162 seats \u2014 so the \"most seats at risk\" is a tie across all of them rather than a unique single flight. If you need to pick one for a cancellation decision, the tiebreaker would have to come from another factor (e.g., passenger load, connection impact, or cancellation cost), which I can pull for a specific flight if you name it.",
+    "passed": false
+  },
+  {
+    "question_id": "Q31",
+    "tier": 3,
+    "prompt": "Captain C-1042 is out for pairing P-2291 (15\u201316 Sep). Produce ranked resolution options with costs and reasoning.",
+    "response": "## Situation summary\n\nCaptain C-1042's absence from **P-2291 (Aircraft VT-DXC)** puts **6 flights at risk across both days**:\n\n- **Day 1 (15 Sep):** DX412, DX413, DX588 \u2014 report 06:00Z, release 15:30Z \u2014 **486 passengers**\n- **Day 2 (16 Sep):** DX589, DX590, DX591 \u2014 report 04:00Z, release 14:45Z \u2014 also at risk\n\nRemaining crew (C-1694 FO, 4 cabin crew) are unaffected; only the Captain seat needs covering.\n\n## Ranked resolution options (retrieved via ranked recovery engine, all pre-checked for qualification, certification, duty, rest, base, and reserve-window legality)\n\n| Rank | Option | Cost (INR) | Delay | Key reasoning |\n|------|--------|-----------|-------|---------------|\n| **1** | **Reserve callout \u2014 Captain C-3310** | **18,500** | 0 hrs | Cheapest zero-delay option; reserve window, rest, duty and type qualification all pass |\n| 2 | Day-off callout \u2014 Captain C-1443 | 24,000 | 0 hrs | Fully legal; slightly higher callout cost than a standing reserve |\n| 3 | Day-off callout \u2014 Captain C-1526 | 24,000 | 0 hrs | Fully legal |\n| 4 | Day-off callout \u2014 Captain C-1938 | 24,000 | 0 hrs | Fully legal |\n| 5 | Day-off callout \u2014 Captain C-3940 | 24,000 | 0 hrs | Fully legal |\n| 6 | Day-off callout \u2014 Captain C-3983 | 24,000 | 0 hrs | Fully legal |\n| 7 | Day-off callout \u2014 Captain C-5566 | 24,000 | 0 hrs | Fully legal |\n| 8 | Day-off callout \u2014 Captain C-2210 + deadhead from DEL | 46,700 | 3.0 hrs | Legal, but position Ferry/deadhead adds cost and a 3-hour delay to day 1 |\n| 9 | Cancel all 6 flights | 1,500,000 | 0 hrs | Fallback only \u2014 no crew candidate selected |\n\n## Recommendation\n\n**Assign Captain C-3310 (Rank 1):** the cheapest option at \u20b918,500 with **zero delay**, covering all 6 flights across both duty days. It avoids:\n\n- the extra \u20b95,500 callout premium of day-off callouts (Ranks 2\u20137),\n- the \u20b946,700 cost plus 3-hour disruption of the DEL deadhead option (Rank 8), and\n- the \u20b91,500,000 cancellation cost and 486+ passenger impact of cancelling (Rank 9) \u2014 roughly **81\u00d7 the cost** of the recommended option.\n\nAll legality gates (aircraft rating, certifications, 7-day duty headroom, rest, and reserve on-call window covering the 06:00Z report) were validated by the recovery engine for C-3310, so the option can be actioned directly.",
+    "passed": false
+  },
+  {
+    "question_id": "Q32",
+    "tier": 3,
+    "prompt": "Both A320 captains (VT-DXA and VT-DXB) are sick at 00:30Z on 18 Sep. Give the optimal joint crewing plan.",
+    "response": "**Optimal joint crewing plan for 18 Sep (VT-DXA + VT-DXB), both A320 captains sick at 00:30Z:**\n\n| Aircraft | Action | Crew | Legality | Delay | Cost |\n|----------|--------|------|----------|-------|------|\n| VT-DXA | Reserve callout \u2014 Captain **C-3305** | \u2705 Legal | 0.0 h | \u20b918,500 |\n| VT-DXB | Day-off callout \u2014 Captain **C-1017** | \u2705 Legal | 0.0 h | \u20b924,000 |\n\n**Total joint cost: \u20b942,500** \u2014 this is the minimum-cost combined plan for the two aircraft.\n\nKey points:\n- Each assignment passed qualification, certification, duty, rest, base, and reserve-window checks, so both aircraft are crewed with **zero delay** despite the early 00:30Z sickness notification.\n- VT-DXA is covered from the reserve pool (cheaper option, \u20b918,500), while VT-DXB requires a day-off callout for Captain C-1017 (\u20b924,000), which is why the total exceeds a single reserve callout.",
+    "passed": true
+  },
+  {
+    "question_id": "Q33",
+    "tier": 3,
+    "prompt": "After the 90-minute delay to VT-DXA on 16 Sep, what should Crew Control do about the FDP breach?",
+    "response": "Here's what Crew Control should do, based on the verified facts:\n\n## The breach is confirmed\n\n- **Pairing P-2203** on VT-DXA (16 Sep): report 01:30Z, release 12:45Z, 4 sectors (DX401\u2013DX404), 6 assigned crew (C-3187, C-5375, C-3211, C-2876, C-1542, C-5089).\n- **RULE-FDP-01**: max FDP 13h, reduced 0.5h per sector beyond the 2nd \u2192 with 4 sectors the limit is **12.0h**.\n- With the 90-minute delay, **FDP after delay = 12.75h vs. the 12.0h limit \u2192 breach of 0.75h**, confirmed for **all six crew members**.\n\n## Required action\n\nThe pairing cannot legally be completed with the current crew once the 90-minute delay stands. Per the ranked recovery options for P-2203:\n\n1. **Recommended (Rank 1): Call out reserve Captain C-3305** \u2014 passes qualification, certification, duty, rest, base, and reserve-window checks; cost \u20b918,500; zero additional delay. This is the cheapest legal fix.\n2. **Fallbacks (Ranks 2\u201314): Day-off callout Captains** (C-1017, C-1042, C-1443, C-1526, etc.) \u2014 all legal at \u20b924,000 with no added delay.\n3. **Last resort (Rank 16): Cancel all 4 flights** \u2014 legal but \u20b91,000,000; avoid since cheaper legal options exist.\n\n## Additional note\n\nThe breach only occurs because the delay pushes FDP to 12.75h \u2014 the 12.0h limit for 4 sectors would tolerate a delay of up to **45 minutes**. If operational recovery could pull the delay back to \u226445 min, the original crew stays legal. But with the 90-minute delay as given, Crew Control should execute the **reserve Captain callout (C-3305)** immediately.",
+    "passed": false
+  },
+  {
+    "question_id": "Q34",
+    "tier": 3,
+    "prompt": "C-5417's recurrent training lapsed. Resolve their 19 Sep assignment.",
+    "response": null,
+    "passed": false
+  },
+  {
+    "question_id": "Q35",
+    "tier": 3,
+    "prompt": "BLR closes 08:00\u201314:00Z on 17 Sep. Outline the recovery plan across affected pairings.",
+    "response": null,
+    "passed": false
+  },
+  {
+    "question_id": "Q36",
+    "tier": 3,
+    "prompt": "Draft the callout notification to C-3310 for covering P-2291.",
+    "response": "All checks are complete \u2014 C-3310 is the only eligible reserve Captain for this report time, and duty legality is confirmed with no issues. Here's the drafted callout notification:\n\n---\n\n**CREW CALLOUT NOTIFICATION \u2014 RESERVE COVERAGE**\n\n**To:** D. Reddy, Captain (C-3310) \u2014 BLR\n**From:** Crew Operations\n**Type:** Reserve callout \u2014 Pairing coverage\n\n**Assignment:** Pairing **P-2291**, aircraft **VT-DXC (A320)** \u2014 aircraft type matches your A320 rating.\n**Role:** **Captain** (covering C-1042)\n\n**Duty schedule (UTC):**\n\n| Day | Date | Report | Release | Flights |\n|---|---|---|---|---|\n| 1 | Tue 2026-09-15 | **06:00Z** | 15:30Z | DX412, DX413, DX588 |\n| 2 | Wed 2026-09-16 | **04:00Z** | 14:45Z | DX589, DX590, DX591 |\n\n**Callout requirements:**\n- Your current on-call window is **06:00\u201318:00 UTC**; callout must fall inside this window (RULE-BASE-07 applies for base BLR).\n- Your reachability is **45 minutes** \u2014 please acknowledge immediately and proceed to report in time for the **06:00Z Day 1 report**.\n\n**Status:** Duty legality for P-2291 commencing 2026-09-15 has been verified \u2014 **legal, no issues**. You are the eligible reserve Captain for this report time.\n\nPlease acknowledge receipt of this callout and confirm your ability to report on time.\n\n---\n\n**Basis for the notification (from retrieved records):**\n- **Reserve profile (C-3310):** Captain, BLR base, active, A320 rated, 45-minute reachability, on-call window 06:00\u201318:00 UTC \u2014 the callout timing constraint (RULE-BASE-07).\n- **Pairing record (P-2291):** A320 VT-DXC, two duty days 2026-09-15 and 2026-09-16, with report/release times and flight lists as shown; Captain role currently held by C-1042.\n- **Reserve availability check:** C-3310 was the only eligible BLR Captain matching the 06:00Z report time (C-3305 excluded \u2014 window ends 05:30Z; C-3315 excluded \u2014 no A320 rating per RULE-QUAL-05).\n- **Legality check:** `check_crew_legality` returned legal with no issues for C-3310 on P-2291 from 2026-09-15.",
+    "passed": false
+  },
+  {
+    "question_id": "Q37",
+    "tier": 3,
+    "prompt": "What is the cheapest legal way to cover the VT-DXF First Officer on 20 Sep if they call sick at 03:30Z?",
+    "response": null,
+    "passed": false
+  },
+  {
+    "question_id": "Q38",
+    "tier": 3,
+    "prompt": "If the desk wants a standing morning briefing, which three data points per aircraft line should it surface and why?",
+    "response": "This is a briefing-design question rather than a lookup of a specific record (no aircraft or date was named), so here are the three data points I'd standardize per aircraft line, each tied to the tool that owns that fact:\n\n**1. Crewing status of today's pairings \u2014 crewed or uncrewed.**\nSurface each aircraft's pairings (via `list_aircraft_pairings`) and flag any uncrewed flights (via `get_uncrewed_flights`). This is the first-order question: if a line has no valid crew, everything else is moot and recovery options shrink fastest early in the day.\n\n**2. Duty-clock headroom for the assigned crew, including planned duty.**\nPull headroom per crew member (`get_duty_headroom` / `get_at_risk_crew`) under RULE-DUTY-02. This tells the desk whether the *planned* day is already tight, so a modest delay doesn't cascade into an illegal FDP. It converts \"legal now\" into \"legal with margin\" \u2014 the difference between a routine day and a mid-afternoon scramble.\n\n**3. Seats/passengers exposed on the line's flights.**\nSurface seat exposure (via `get_most_seats` for schedule-wide ranking, `get_cancellation_impact` for a named flight). This prioritizes the desk's attention: two lines may both be fragile, but the one with the most seats at risk drives recovery cost and reaccommodation effort.\n\nWhy these three: they answer, in order, *is it crewed \u2192 will it stay legal \u2192 what does failure cost*. That maps directly to the escalation path \u2014 if line 1 or 2 shows a gap, the desk immediately knows to check reserve coverage (`get_available_reserves`) and downstream rest (`check_downstream_rest`) before the disruption materializes.\n\nIf you give me an aircraft registration and date, I can pull a live sample line showing all three.",
+    "passed": true
+  }
+]

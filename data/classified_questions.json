@@ -1,0 +1,160 @@
+{
+    "tier_1":  [
+                   {
+                       "prompt":  "Who is on reserve at BLR on 2026-09-15, and what are their on-call windows?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "As of the snapshot, how many duty hours has C-1042 accrued in the 7 calendar days ending 2026-09-14, and how much headroom does that leave under RULE-DUTY-02?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "Which flights depart DEL on 2026-09-15?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "List all certifications expiring within 30 days of 2026-09-15.",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "Which aircraft operates DX412 on 2026-09-15, and how many seats does it have?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "What is C-3310\u0027s reserve on-call window and reachability?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "What is C-2210\u0027s base and rating?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "Which crew are assigned to pairing P-2291, and in what roles?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "Which flights fly BLRâ†’BOM on 2026-09-17?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "How many flights operate on 2026-09-16 in total?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "How many captains are based at DEL, and who are they?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "What is the longest block time in the schedule, and which flights have it?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "What is C-2087\u0027s rank, and total flight hours over the 28 days ending 2026-09-14?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "Which stations does the network serve nonstop from BLR?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "Who is the Senior Cabin Crew on VT-DXB\u0027s pairing on 2026-09-16?",
+                       "tier":  1
+                   },
+                   {
+                       "prompt":  "What is the disruption-risk score for C-1042 and what drives it?",
+                       "tier":  1
+                   }
+               ],
+    "tier_2":  [
+                   {
+                       "prompt":  "Captain C-1042 calls in sick at 05:00Z on 15 Sep for pairing P-2291. Which flights are immediately uncrewed?",
+                       "tier":  2
+                   },
+                   {
+                       "prompt":  "If Captain C-2087 is assigned to cover P-2291 from 15 Sep, does any rule breach? Give the detail.",
+                       "tier":  2
+                   },
+                   {
+                       "prompt":  "BLR is closed 08:00â€“14:00Z on 17 Sep. Which flights are affected?",
+                       "tier":  2
+                   },
+                   {
+                       "prompt":  "VT-DXA is delayed 90 minutes before DX401 on 16 Sep. Does the rostered crew breach any limit if they fly all four legs?",
+                       "tier":  2
+                   },
+                   {
+                       "prompt":  "Can C-2210 (DEL base) legally cover P-2291 if positioned to BLR on the morning of 15 Sep? What is the operational consequence?",
+                       "tier":  2
+                   },
+                   {
+                       "prompt":  "Can C-5417 legally operate their rostered VT-DXB duty on 19 Sep?",
+                       "tier":  2
+                   },
+                   {
+                       "prompt":  "A crew is released at 15:30Z on 16 Sep. What is the earliest they may report next?",
+                       "tier":  2
+                   },
+                   {
+                       "prompt":  "Can reserve C-3305 cover the FULL pairing P-2291 (both days)? Why or why not?",
+                       "tier":  2
+                   },
+                   {
+                       "prompt":  "If DX404 on 16 Sep is cancelled, how many passengers are affected and what is the direct cancellation cost?",
+                       "tier":  2
+                   },
+                   {
+                       "prompt":  "Which crew have 45 or more duty hours in the 7 days ending 2026-09-15 (including any planned duty that day)?",
+                       "tier":  2
+                   },
+                   {
+                       "prompt":  "The VT-DXE captain is sick on 16 Sep (called 01:30Z). Which reserve captains\u0027 on-call windows cover the callout, and are they qualified?",
+                       "tier":  2
+                   },
+                   {
+                       "prompt":  "Captain C-5837 (VT-DXA line, works 14/17/20 Sep) is proposed to cover P-2291. Legal?",
+                       "tier":  2
+                   },
+                   {
+                       "prompt":  "Station HYD is closed 05:00â€“09:00Z on 19 Sep. Which flights are affected?",
+                       "tier":  2
+                   },
+                   {
+                       "prompt":  "Which single flight leg has the most seats at risk if cancelled, and why?",
+                       "tier":  2
+                   }
+               ],
+    "tier_3":  [
+                   {
+                       "prompt":  "Captain C-1042 is out for pairing P-2291 (15â€“16 Sep). Produce ranked resolution options with costs and reasoning.",
+                       "tier":  3
+                   },
+                   {
+                       "prompt":  "Both A320 captains (VT-DXA and VT-DXB) are sick at 00:30Z on 18 Sep. Give the optimal joint crewing plan.",
+                       "tier":  3
+                   },
+                   {
+                       "prompt":  "After the 90-minute delay to VT-DXA on 16 Sep, what should Crew Control do about the FDP breach?",
+                       "tier":  3
+                   },
+                   {
+                       "prompt":  "C-5417\u0027s recurrent training lapsed. Resolve their 19 Sep assignment.",
+                       "tier":  3
+                   },
+                   {
+                       "prompt":  "BLR closes 08:00â€“14:00Z on 17 Sep. Outline the recovery plan across affected pairings.",
+                       "tier":  3
+                   },
+                   {
+                       "prompt":  "Draft the callout notification to C-3310 for covering P-2291.",
+                       "tier":  3
+                   },
+                   {
+                       "prompt":  "What is the cheapest legal way to cover the VT-DXF First Officer on 20 Sep if they call sick at 03:30Z?",
+                       "tier":  3
+                   },
+                   {
+                       "prompt":  "If the desk wants a standing morning briefing, which three data points per aircraft line should it surface and why?",
+                       "tier":  3
+                   }
+               ]
+}
