@@ -31,7 +31,7 @@ services:
         condition: service_completed_successfully
     environment:
       CREW_OPERATIONS_DB: /var/lib/sqlite/crew_operations.db
-      OPENROUTER_API_KEY: 
+      OPENROUTER_API_KEY: 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
       OPENROUTER_MODEL: z-ai/glm-5.3-flash
       CREW_OPERATIONS_API_URL: http://127.0.0.1:8000
     ports:
@@ -39,5 +39,20 @@ services:
     volumes:
       - sqlite_data:/var/lib/sqlite:ro
 
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - api
+    environment:
+      VITE_API_PROXY_TARGET: http://api:8000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+
 volumes:
   sqlite_data:
+  frontend_node_modules:
