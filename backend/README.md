@@ -147,6 +147,10 @@ API exposes:
 The LangChain agent is available through:
 
 - `POST /api/chat` - accepts `{"question": "..."}` and returns an LLM answer.
+- `GET /api/chat/history?session_id=default` - returns the persisted chat messages
+  for a session. Chat messages are stored in the `chat_history` table, which is
+  created by the SQLite importer during Docker database boot and preserved when
+  operational tables are re-imported.
 
 The agent has retrieval tools backed by the HTTP API, including
 `get_duty_clock`, `get_duty_history`, `get_duty_headroom`, and `get_rule` for

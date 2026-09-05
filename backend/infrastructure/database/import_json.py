@@ -7,6 +7,7 @@ from typing import Any
 
 DATA_DIR = Path("/data")
 DATABASE_PATH = Path("/var/lib/sqlite/crew_operations.db")
+CHAT_HISTORY_TABLE = "chat_history"
 
 
 def table_name(path: Path) -> str:
@@ -163,6 +164,22 @@ def insert_tables(connection: sqlite3.Connection, tables: dict[str, dict[str, An
             )
 
 
+def create_chat_history_table(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS chat_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT NOT NULL,
+            role TEXT NOT NULL,
+            content TEXT NOT NULL,
+            source_question TEXT,
+            created_at TEXT NOT NULL,
+            response_time_ms INTEGER
+        )
+        """
+    )
+
+
 def main() -> None:
     DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
     json_files = sorted(DATA_DIR.glob("*.json"))
@@ -175,6 +192,8 @@ def main() -> None:
             "SELECT name FROM sqlite_master WHERE type = 'table'"
         ).fetchall()
         for (table,) in existing_tables:
+            if table in {CHAT_HISTORY_TABLE, "sqlite_sequence"}:
+                continue
             connection.execute(f"DROP TABLE IF EXISTS {quote_identifier(table)}")
 
         tables: dict[str, dict[str, Any]] = {}
@@ -189,6 +208,7 @@ def main() -> None:
         finalize_unique_columns(tables)
         create_tables(connection, tables)
         insert_tables(connection, tables)
+        create_chat_history_table(connection)
         connection.execute("PRAGMA foreign_keys = ON")
         violations = connection.execute("PRAGMA foreign_key_check").fetchall()
         if violations:

@@ -63,3 +63,11 @@ a Captain**. Change "FO C-2087" → "Captain C-2087" in the doc.
 python3 validate.py            # checks data/ (PASS/FAIL with details)
 python3 generate.py            # regenerates everything (seed-stable)
 ```
+
+## Frontend redeployment
+
+Rebuild and recreate the frontend service after frontend changes:
+
+```bash
+docker compose up --build --force-recreate -d frontend
+```

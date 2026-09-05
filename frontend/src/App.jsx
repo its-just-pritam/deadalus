@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowUp, Bot, Check, CircleHelp, Clock3, Copy, RefreshCw, RotateCcw, Send, Sparkles, UserRound } from 'lucide-react'
 
 const suggestions = [
@@ -6,6 +6,7 @@ const suggestions = [
   'What is C-1042\'s duty-hour headroom?',
   'Which flights are affected by the BLR closure on 17 Sep?',
 ]
+const SESSION_ID = 'default'
 
 const initialMessages = [
   {
@@ -39,12 +40,35 @@ export function App() {
   const [error, setError] = useState('')
   const [copiedId, setCopiedId] = useState(null)
 
+  useEffect(() => {
+    let active = true
+    fetch(`/api/chat/history?session_id=${SESSION_ID}`)
+      .then((response) => (response.ok ? response.json() : []))
+      .then((history) => {
+        if (active && history.length > 0) {
+          setMessages(history.map((message) => ({
+            id: message.message_id,
+            role: message.role,
+            content: message.content,
+            createdAt: message.created_at,
+            responseTimeMs: message.response_time_ms,
+            sourceQuestion: message.source_question,
+          })))
+        }
+      })
+      .catch(() => {})
+
+    return () => {
+      active = false
+    }
+  }, [])
+
   async function sendQuestion(event, questionOverride = '') {
     event?.preventDefault()
     const trimmed = (questionOverride || question).trim()
     if (!trimmed || isSending) return
 
-    const userMessage = { id: Date.now(), role: 'user', content: trimmed }
+    const userMessage = { id: `user-${Date.now()}`, role: 'user', content: trimmed }
     setMessages((current) => [...current, userMessage])
     setQuestion('')
     setError('')
@@ -55,19 +79,18 @@ export function App() {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: trimmed }),
+        body: JSON.stringify({ question: trimmed, session_id: SESSION_ID }),
       })
       const payload = await response.json()
       if (!response.ok) throw payload
-      const responseTimeMs = Math.round(performance.now() - requestStartedAt)
       setMessages((current) => [
         ...current,
         {
-          id: Date.now() + 1,
+          id: payload.message_id,
           role: 'assistant',
           content: payload.answer,
-          createdAt: new Date().toISOString(),
-          responseTimeMs,
+          createdAt: payload.created_at,
+          responseTimeMs: payload.response_time_ms,
           sourceQuestion: trimmed,
         },
       ])
@@ -113,10 +136,6 @@ export function App() {
       <aside className="sidebar">
         <div className="brand-lockup">
           <img className="brand-logo" src="/dcotex-logo.webp" alt="dCortex" />
-          <div>
-            <p className="eyebrow">dCortex Air</p>
-            <h1>Control room</h1>
-          </div>
         </div>
         <div className="sidebar-rule" />
         <div className="status-card">
